@@ -55,7 +55,10 @@
                 
                 <div class="slider-container">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-children-affected">Children Affected</span>
+                        <span class="slider-label" id="label-children-affected">
+                            Children Affected
+                            <span class="tooltip-icon" data-tooltip="The estimated number of new pupils each year who live in areas where the council wants to stop providing free transport.">?</span>
+                        </span>
                         <span class="slider-value" id="val-children-affected">340</span>
                     </div>
                     <input type="range" id="input-children-affected" min="50" max="1000" step="10" value="340" aria-labelledby="label-children-affected">
@@ -63,7 +66,10 @@
 
                 <div class="slider-container">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-opt-out-rate">Opt-Out Rate</span>
+                        <span class="slider-label" id="label-opt-out-rate">
+                            Opt-Out Rate
+                            <span class="tooltip-icon" data-tooltip="The percentage of affected families who choose to make their own travel arrangements instead of using council-provided transport.">?</span>
+                        </span>
                         <span class="slider-value" id="val-opt-out-rate">70%</span>
                     </div>
                     <input type="range" id="input-opt-out-rate" min="0" max="100" step="5" value="70" data-unit="%" aria-labelledby="label-opt-out-rate">
@@ -71,7 +77,10 @@
 
                 <div class="slider-container">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-erosion-rate">Erosion Rate (Attrition)</span>
+                        <span class="slider-label" id="label-erosion-rate">
+                            Erosion Rate (Attrition)
+                            <span class="tooltip-icon" data-tooltip="The percentage by which the student cohorts shrink each year due to families moving, changing schools, or growing older.">?</span>
+                        </span>
                         <span class="slider-value" id="val-erosion-rate">10%</span>
                     </div>
                     <input type="range" id="input-erosion-rate" min="0" max="30" step="1" value="10" data-unit="%" aria-labelledby="label-erosion-rate">
@@ -92,7 +101,10 @@
                 
                 <div class="slider-container">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-taxi-cost">Cost per Taxi / Day</span>
+                        <span class="slider-label" id="label-taxi-cost">
+                            Cost per Taxi / Day
+                            <span class="tooltip-icon" data-tooltip="The daily charge of a single private hire taxi or minibus hired by the council to transport children.">?</span>
+                        </span>
                         <span class="slider-value" id="val-taxi-cost">£125</span>
                     </div>
                     <input type="range" id="input-taxi-cost" min="50" max="300" step="5" value="125" data-unit="" aria-labelledby="label-taxi-cost">
@@ -116,7 +128,10 @@
                 <!-- Rates -->
                 <div class="slider-container">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-appeals-rate-s1">S1 Appeal Rate (of actual)</span>
+                        <span class="slider-label" id="label-appeals-rate-s1">
+                            S1 Appeal Rate (of actual)
+                            <span class="tooltip-icon" data-tooltip="The proportion of actual affected families who challenge the council's decision by lodging a Stage 1 internal appeal.">?</span>
+                        </span>
                         <span class="slider-value" id="val-appeals-rate-s1">45%</span>
                     </div>
                     <input type="range" id="input-appeals-rate-s1" min="0" max="100" step="5" value="45" data-unit="%" aria-labelledby="label-appeals-rate-s1">
@@ -124,7 +139,10 @@
 
                 <div class="slider-container">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-appeals-rate-s2">S2 Escalation Rate (of S1)</span>
+                        <span class="slider-label" id="label-appeals-rate-s2">
+                            S2 Escalation Rate (of S1)
+                            <span class="tooltip-icon" data-tooltip="The proportion of families whose Stage 1 appeals were rejected who escalate their case to a Stage 2 Independent Panel hearing.">?</span>
+                        </span>
                         <span class="slider-value" id="val-appeals-rate-s2">50%</span>
                     </div>
                     <input type="range" id="input-appeals-rate-s2" min="0" max="100" step="5" value="50" data-unit="%" aria-labelledby="label-appeals-rate-s2">
@@ -132,7 +150,10 @@
 
                 <div class="slider-container">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-appeals-rate-s3">S3 Ombudsman Rate (of S2)</span>
+                        <span class="slider-label" id="label-appeals-rate-s3">
+                            S3 Ombudsman Rate (of S2)
+                            <span class="tooltip-icon" data-tooltip="The proportion of families whose Stage 2 appeals were rejected who take their case to the Local Government Ombudsman.">?</span>
+                        </span>
                         <span class="slider-value" id="val-appeals-rate-s3">20%</span>
                     </div>
                     <input type="range" id="input-appeals-rate-s3" min="0" max="100" step="5" value="20" data-unit="%" aria-labelledby="label-appeals-rate-s3">
@@ -141,7 +162,10 @@
                 <!-- Unit Costs -->
                 <div class="slider-container" style="border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 12px; margin-top: 12px;">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-appeals-cost-s1">S1 Appeal Unit Cost</span>
+                        <span class="slider-label" id="label-appeals-cost-s1">
+                            S1 Appeal Unit Cost
+                            <span class="tooltip-icon" data-tooltip="The average staff and admin cost to the council to process and review a single Stage 1 appeal.">?</span>
+                        </span>
                         <span class="slider-value" id="val-appeals-cost-s1">£150</span>
                     </div>
                     <input type="range" id="input-appeals-cost-s1" min="0" max="1000" step="50" value="150" aria-labelledby="label-appeals-cost-s1">
@@ -149,7 +173,10 @@
 
                 <div class="slider-container">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-appeals-cost-s2">S2 Appeal Unit Cost</span>
+                        <span class="slider-label" id="label-appeals-cost-s2">
+                            S2 Appeal Unit Cost
+                            <span class="tooltip-icon" data-tooltip="The average cost to hold an independent appeal panel hearing, including panels member fees, clerk prep, and travel.">?</span>
+                        </span>
                         <span class="slider-value" id="val-appeals-cost-s2">£750</span>
                     </div>
                     <input type="range" id="input-appeals-cost-s2" min="0" max="3000" step="100" value="750" aria-labelledby="label-appeals-cost-s2">
@@ -157,7 +184,10 @@
 
                 <div class="slider-container">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-appeals-cost-s3">S3 Ombudsman Unit Cost</span>
+                        <span class="slider-label" id="label-appeals-cost-s3">
+                            S3 Ombudsman Unit Cost
+                            <span class="tooltip-icon" data-tooltip="The average staff and legal cost to investigate and respond to a complaint escalated to the Ombudsman.">?</span>
+                        </span>
                         <span class="slider-value" id="val-appeals-cost-s3">£1,400</span>
                     </div>
                     <input type="range" id="input-appeals-cost-s3" min="0" max="5000" step="100" value="1400" aria-labelledby="label-appeals-cost-s3">
@@ -170,7 +200,10 @@
                 
                 <div class="slider-container">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-admin-cost">Ongoing Admin Cost / Yr</span>
+                        <span class="slider-label" id="label-admin-cost">
+                            Ongoing Admin Cost / Yr
+                            <span class="tooltip-icon" data-tooltip="The yearly general administrative cost to run the transport scheme (software licenses, mapping reviews, database updates).">?</span>
+                        </span>
                         <span class="slider-value" id="val-admin-cost">£20,000</span>
                     </div>
                     <input type="range" id="input-admin-cost" min="0" max="100000" step="5000" value="20000" data-unit="" aria-labelledby="label-admin-cost">
@@ -183,7 +216,10 @@
                 
                 <div class="slider-container">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-council-savings">7-Yr Cumulative Claimed Savings</span>
+                        <span class="slider-label" id="label-council-savings">
+                            7-Yr Cumulative Claimed Savings
+                            <span class="tooltip-icon" data-tooltip="The total cumulative savings that the council claims this policy will generate over the next 7 years.">?</span>
+                        </span>
                         <span class="slider-value" id="val-council-savings">£3,000,000</span>
                     </div>
                     <input type="range" id="input-council-savings" min="500000" max="10000000" step="250000" value="3000000" aria-labelledby="label-council-savings">
