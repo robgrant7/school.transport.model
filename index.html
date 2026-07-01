@@ -8,6 +8,29 @@
     <link rel="stylesheet" href="style.css">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .derived-stats-box {
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+        }
+        .derived-stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            color: var(--text-secondary);
+        }
+        .derived-stat-row:last-child {
+            margin-bottom: 0;
+        }
+        .derived-stat-val {
+            color: var(--protest-blue);
+            font-weight: 700;
+        }
+    </style>
 </head>
 <body>
 
@@ -26,80 +49,98 @@
         <aside class="controls-sidebar">
             <h2 class="section-title">Model Parameters</h2>
             
-            <!-- Group: Affected cohort -->
+            <!-- Group: Population -->
             <div class="control-group">
-                <div class="control-group-title">Pupil Demographics</div>
+                <div class="control-group-title">Population & Cohorts</div>
                 
                 <div class="slider-container">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-affected-pupils">Affected Pupils / Year</span>
-                        <span class="slider-value" id="val-affected-pupils">340</span>
+                        <span class="slider-label" id="label-children-affected">Children Affected</span>
+                        <span class="slider-value" id="val-children-affected">340</span>
                     </div>
-                    <input type="range" id="input-affected-pupils" min="50" max="1000" step="10" value="340" aria-labelledby="label-affected-pupils">
+                    <input type="range" id="input-children-affected" min="50" max="1000" step="10" value="340" aria-labelledby="label-children-affected">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" id="label-opt-out-rate">Opt-Out Rate</span>
+                        <span class="slider-value" id="val-opt-out-rate">70%</span>
+                    </div>
+                    <input type="range" id="input-opt-out-rate" min="0" max="100" step="5" value="70" data-unit="%" aria-labelledby="label-opt-out-rate">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" id="label-erosion-rate">Erosion Rate (Attrition)</span>
+                        <span class="slider-value" id="val-erosion-rate">10%</span>
+                    </div>
+                    <input type="range" id="input-erosion-rate" min="0" max="30" step="1" value="10" data-unit="%" aria-labelledby="label-erosion-rate">
+                </div>
+
+                <!-- Derived Read-only population values -->
+                <div class="derived-stats-box">
+                    <div class="derived-stat-row">
+                        <span>Actual Affected Children:</span>
+                        <span class="derived-stat-val" id="val-actual-affected">102</span>
+                    </div>
                 </div>
             </div>
 
             <!-- Group: Taxi Parameters -->
             <div class="control-group">
-                <div class="control-group-title">Required Free Transport</div>
+                <div class="control-group-title">Transport (Taxis)</div>
                 
                 <div class="slider-container">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-pct-taxis">% Requiring Bespoke Taxi</span>
-                        <span class="slider-value" id="val-pct-taxis">1.5%</span>
+                        <span class="slider-label" id="label-taxi-cost">Cost per Taxi / Day</span>
+                        <span class="slider-value" id="val-taxi-cost">£125</span>
                     </div>
-                    <input type="range" id="input-pct-taxis" min="0" max="10" step="0.1" value="1.5" data-unit="%" aria-labelledby="label-pct-taxis">
+                    <input type="range" id="input-taxi-cost" min="50" max="300" step="5" value="125" data-unit="" aria-labelledby="label-taxi-cost">
                 </div>
 
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" id="label-taxi-cost">Bespoke Taxi Cost / Day</span>
-                        <span class="slider-value" id="val-taxi-cost">£150</span>
+                <div class="derived-stats-box">
+                    <div class="derived-stat-row">
+                        <span>Number of Taxis Required:</span>
+                        <span class="derived-stat-val" id="val-taxis-required">34</span>
                     </div>
-                    <input type="range" id="input-taxi-cost" min="50" max="400" step="10" value="150" data-unit="" aria-labelledby="label-taxi-cost">
+                    <div class="derived-stat-row" style="font-size: 0.7rem; color: var(--text-muted);">
+                        <span>* Occupancy: 3 children / taxi</span>
+                    </div>
                 </div>
             </div>
 
             <!-- Group: Appeals Parameters -->
             <div class="control-group">
-                <div class="control-group-title">Appeals Progression Rates</div>
+                <div class="control-group-title">Appeals Progression</div>
                 
                 <div class="slider-container">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-appeals-rate-s1">S1 Appeal Rate (of affected)</span>
-                        <span class="slider-value" id="val-appeals-rate-s1">16.7%</span>
+                        <span class="slider-label" id="label-appeals-rate-s1">S1 Appeal Rate (of actual)</span>
+                        <span class="slider-value" id="val-appeals-rate-s1">45%</span>
                     </div>
-                    <input type="range" id="input-appeals-rate-s1" min="0" max="50" step="0.5" value="16.7" data-unit="%" aria-labelledby="label-appeals-rate-s1">
+                    <input type="range" id="input-appeals-rate-s1" min="0" max="100" step="5" value="45" data-unit="%" aria-labelledby="label-appeals-rate-s1">
                 </div>
 
                 <div class="slider-container">
                     <div class="slider-header">
                         <span class="slider-label" id="label-appeals-rate-s2">S2 Escalation Rate (of S1)</span>
-                        <span class="slider-value" id="val-appeals-rate-s2">45.0%</span>
+                        <span class="slider-value" id="val-appeals-rate-s2">50%</span>
                     </div>
-                    <input type="range" id="input-appeals-rate-s2" min="0" max="100" step="1" value="45" data-unit="%" aria-labelledby="label-appeals-rate-s2">
+                    <input type="range" id="input-appeals-rate-s2" min="0" max="100" step="5" value="50" data-unit="%" aria-labelledby="label-appeals-rate-s2">
                 </div>
 
                 <div class="slider-container">
                     <div class="slider-header">
                         <span class="slider-label" id="label-appeals-rate-s3">S3 Ombudsman Rate (of S2)</span>
-                        <span class="slider-value" id="val-appeals-rate-s3">33.3%</span>
+                        <span class="slider-value" id="val-appeals-rate-s3">20%</span>
                     </div>
-                    <input type="range" id="input-appeals-rate-s3" min="0" max="100" step="1" value="33" data-unit="%" aria-labelledby="label-appeals-rate-s3">
-                </div>
-
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" id="label-appeals-decay">Appeals Decay / Year</span>
-                        <span class="slider-value" id="val-appeals-decay">25%</span>
-                    </div>
-                    <input type="range" id="input-appeals-decay" min="0" max="50" step="5" value="25" data-unit="%" aria-labelledby="label-appeals-decay">
+                    <input type="range" id="input-appeals-rate-s3" min="0" max="100" step="5" value="20" data-unit="%" aria-labelledby="label-appeals-rate-s3">
                 </div>
             </div>
 
             <!-- Group: Admin Costs -->
             <div class="control-group">
-                <div class="control-group-title">Admin Costs</div>
+                <div class="control-group-title">General Administration</div>
                 
                 <div class="slider-container">
                     <div class="slider-header">
@@ -112,14 +153,14 @@
 
             <!-- Group: Council Savings Claim -->
             <div class="control-group">
-                <div class="control-group-title">Claimed Savings Base</div>
+                <div class="control-group-title">Council Claims</div>
                 
                 <div class="slider-container">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-council-savings">Council Savings Claim at Y7</span>
+                        <span class="slider-label" id="label-council-savings">7-Yr Cumulative Claimed Savings</span>
                         <span class="slider-value" id="val-council-savings">£3,000,000</span>
                     </div>
-                    <input type="range" id="input-council-savings" min="500000" max="5000000" step="100000" value="3000000" aria-labelledby="label-council-savings">
+                    <input type="range" id="input-council-savings" min="500000" max="10000000" step="250000" value="3000000" aria-labelledby="label-council-savings">
                 </div>
             </div>
 
@@ -141,25 +182,25 @@
                 
                 <div class="metric-card" id="card-taxi-cost">
                     <div class="metric-label">Compounded Taxi Cost (7 Yrs)</div>
-                    <div class="metric-value yellow-text" id="kpi-compounded-taxi">£4,275,000</div>
-                    <div class="metric-subtext">Due to route fracturing and rural isolation</div>
+                    <div class="metric-value yellow-text" id="kpi-compounded-taxi">£17,227,447</div>
+                    <div class="metric-subtext">Required free transport due to route fracturing</div>
                 </div>
 
                 <div class="metric-card" id="card-dispute-cost">
                     <div class="metric-label">Appeals Cost (S1+S2+S3) (7 Yrs)</div>
-                    <div class="metric-value blue-text" id="kpi-dispute-cost">£495,439</div>
-                    <div class="metric-subtext">Staffing, Clerk panels, and Ombudsman reviews</div>
+                    <div class="metric-value blue-text" id="kpi-dispute-cost">£159,242</div>
+                    <div class="metric-subtext">S1 reviews, S2 panels, and Ombudsman inquiries</div>
                 </div>
 
                 <div class="metric-card" id="card-admin-cost-panel">
                     <div class="metric-label">General Admin Cost (7 Yrs)</div>
                     <div class="metric-value yellow-text" id="kpi-admin-cost">£140,000</div>
-                    <div class="metric-subtext">Software mapping, systems, and liaison</div>
+                    <div class="metric-subtext">Mapping updates, software, systems and liaison</div>
                 </div>
 
                 <div class="metric-card deficit-alert" id="card-cost-coverage">
                     <div class="metric-label" id="kpi-cost-coverage-label">Savings Eaten By Costs</div>
-                    <div class="metric-value deficit-text" id="kpi-cost-coverage">116%</div>
+                    <div class="metric-value deficit-text" id="kpi-cost-coverage">584%</div>
                     <div class="metric-subtext">Percentage of claimed savings consumed</div>
                 </div>
             </div>
@@ -281,7 +322,7 @@
                             <div class="info-box-title">
                                 <span>⚠️ The "100% Behavioural Compliance" Trap</span>
                             </div>
-                            <p>The council's financial model assumes that 100% of affected families will accept losing transport and fund their own travel to their catchment school.</p>
+                            <p>The council's financial model assumes that 100% of affected families will accept losing transport and fund their own travel to their preferred catchment school.</p>
                             <div class="info-box-highlight warning">
                                 If parents instead enroll their children in their new "nearest" school to secure free transport, the council must commission new, un-optimised routes, driving up costs.
                             </div>

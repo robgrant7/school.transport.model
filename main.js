@@ -1,60 +1,57 @@
 document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------------------------
-    // Baseline constants and default parameters (Revised)
+    // Baseline constants and default parameters (Final Spreadsheet Spec)
     // -------------------------------------------------------------
     const defaults = {
-        affectedPupilsPerYear: 340,
-        pctBespokeTaxis: 0.015, // 1.5%
-        taxiCostPerDay: 150,
+        childrenAffected: 340,
+        optOutRate: 0.70,     // 70%
+        erosionRate: 0.10,    // 10%
+        observationWindow: 7, // 7 years
+        taxiCostPerDay: 125,
         pupilsPerTaxi: 3,
         schoolDays: 190,
         schoolCareer: 5,
-        s1AppealsRate: 0.167, // 16.7% of affected pupils
-        s2AppealsRate: 0.450, // 45% of Stage 1
-        s3OmbudRate: 0.333,   // 33.3% of Stage 2
-        appealsDecay: 0.25,   // 25%
-        s1Salary: 40,
-        s1Hours: 4,
-        s2ClerkSalary: 40,
-        s2ClerkHours: 8,
-        s2OfficerSalary: 50,
-        s2OfficerHours: 5,
-        s2TravelCost: 186,
-        ombudInfoGovSalary: 130,
-        ombudInfoGovHours: 7,
-        ombudLegalSalary: 85,
-        ombudLegalHours: 4,
-        ombudCeoSalary: 90,
-        ombudCeoHours: 2,
+        s1AppealsRate: 0.45,  // 45% of actual affected children
+        s2AppealsRate: 0.50,  // 50% of Stage 1
+        s3OmbudRate: 0.20,    // 20% of Stage 2
+        s1Cost: 150,
+        s2Cost: 750,
+        s3Cost: 1400,
         ongoingAdminCost: 20000,
-        councilSavingsY7: 3000000
+        councilSavingsClaim: 3000000 // Cumulative over 7 years
     };
 
     // -------------------------------------------------------------
     // UI Elements
     // -------------------------------------------------------------
     const inputs = {
-        affectedPupilsPerYear: document.getElementById('input-affected-pupils'),
-        pctBespokeTaxis: document.getElementById('input-pct-taxis'),
+        childrenAffected: document.getElementById('input-children-affected'),
+        optOutRate: document.getElementById('input-opt-out-rate'),
+        erosionRate: document.getElementById('input-erosion-rate'),
         taxiCostPerDay: document.getElementById('input-taxi-cost'),
         s1AppealsRate: document.getElementById('input-appeals-rate-s1'),
         s2AppealsRate: document.getElementById('input-appeals-rate-s2'),
         s3OmbudRate: document.getElementById('input-appeals-rate-s3'),
-        appealsDecay: document.getElementById('input-appeals-decay'),
         ongoingAdminCost: document.getElementById('input-admin-cost'),
-        councilSavingsY7: document.getElementById('input-council-savings')
+        councilSavingsClaim: document.getElementById('input-council-savings')
     };
 
     const values = {
-        affectedPupilsPerYear: document.getElementById('val-affected-pupils'),
-        pctBespokeTaxis: document.getElementById('val-pct-taxis'),
+        childrenAffected: document.getElementById('val-children-affected'),
+        optOutRate: document.getElementById('val-opt-out-rate'),
+        erosionRate: document.getElementById('val-erosion-rate'),
         taxiCostPerDay: document.getElementById('val-taxi-cost'),
         s1AppealsRate: document.getElementById('val-appeals-rate-s1'),
         s2AppealsRate: document.getElementById('val-appeals-rate-s2'),
         s3OmbudRate: document.getElementById('val-appeals-rate-s3'),
-        appealsDecay: document.getElementById('val-appeals-decay'),
         ongoingAdminCost: document.getElementById('val-admin-cost'),
-        councilSavingsY7: document.getElementById('val-council-savings')
+        councilSavingsClaim: document.getElementById('val-council-savings')
+    };
+
+    // Calculated read-only values in control panel
+    const derivedDisplays = {
+        actualAffected: document.getElementById('val-actual-affected'),
+        taxisRequired: document.getElementById('val-taxis-required')
     };
 
     const kpis = {
@@ -88,74 +85,68 @@ document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------------------------
     function runModel() {
         // Read active parameters from DOM
-        const affectedPupilsPerYear = parseFloat(inputs.affectedPupilsPerYear.value);
-        const pctBespokeTaxis = parseFloat(inputs.pctBespokeTaxis.value) / 100;
+        const childrenAffected = parseFloat(inputs.childrenAffected.value);
+        const optOutRate = parseFloat(inputs.optOutRate.value) / 100;
+        const erosionRate = parseFloat(inputs.erosionRate.value) / 100;
         const taxiCostPerDay = parseFloat(inputs.taxiCostPerDay.value);
         const s1AppealsRate = parseFloat(inputs.s1AppealsRate.value) / 100;
         const s2AppealsRate = parseFloat(inputs.s2AppealsRate.value) / 100;
         const s3OmbudRate = parseFloat(inputs.s3OmbudRate.value) / 100;
-        const appealsDecay = parseFloat(inputs.appealsDecay.value) / 100;
         const ongoingAdminCost = parseFloat(inputs.ongoingAdminCost.value);
-        const councilSavingsY7 = parseFloat(inputs.councilSavingsY7.value);
+        const councilSavingsClaim = parseFloat(inputs.councilSavingsClaim.value);
 
         // Fixed defaults for inner operations (to preserve simplicity in sidebar)
         const pupilsPerTaxi = defaults.pupilsPerTaxi;
         const schoolDays = defaults.schoolDays;
         const schoolCareer = defaults.schoolCareer;
-        const s1Salary = defaults.s1Salary;
-        const s1Hours = defaults.s1Hours;
-        const s2ClerkSalary = defaults.s2ClerkSalary;
-        const s2ClerkHours = defaults.s2ClerkHours;
-        const s2OfficerSalary = defaults.s2OfficerSalary;
-        const s2OfficerHours = defaults.s2OfficerHours;
-        const s2TravelCost = defaults.s2TravelCost;
-        const ombudInfoGovSalary = defaults.ombudInfoGovSalary;
-        const ombudInfoGovHours = defaults.ombudInfoGovHours;
-        const ombudLegalSalary = defaults.ombudLegalSalary;
-        const ombudLegalHours = defaults.ombudLegalHours;
-        const ombudCeoSalary = defaults.ombudCeoSalary;
-        const ombudCeoHours = defaults.ombudCeoHours;
+        const s1Cost = defaults.s1Cost;
+        const s2Cost = defaults.s2Cost;
+        const s3Cost = defaults.s3Cost;
 
         // Derived variables
-        const pupilsRequiringTaxiPerDay = affectedPupilsPerYear * pctBespokeTaxis;
-        const taxisRequiredPerDay = pupilsRequiringTaxiPerDay / pupilsPerTaxi;
-        const costTaxisPerDay = taxisRequiredPerDay * taxiCostPerDay;
-        const annualTaxiCost = costTaxisPerDay * schoolDays;
+        const actualAffected = Math.round(childrenAffected * (1 - optOutRate) * 100) / 100;
+        const baseCohortTaxis = actualAffected / pupilsPerTaxi;
+        const annualTaxiCost = baseCohortTaxis * taxiCostPerDay * schoolDays;
 
-        const s1CostPerAppeal = s1Salary * s1Hours; 
-        const s2CostPerAppeal = s2ClerkSalary * s2ClerkHours + s2OfficerSalary * s2OfficerHours + s2TravelCost; 
-        const ombudCostPerAppeal = ombudInfoGovSalary * ombudInfoGovHours + ombudLegalSalary * ombudLegalHours + ombudCeoSalary * ombudCeoHours; 
+        // Peak annual savings S in Year 7: 4 * S = claim => S = claim / 4
+        const peakSavingsY7 = councilSavingsClaim / 4;
 
         let cumulativeTaxi = 0;
         let cumulativeAppealsTotal = 0;
         let cumulativeAdmin = 0;
         let cumulativeCouncilSavings = 0;
+        let cumulativeTotal = 0;
 
         const yearsData = [];
 
         for (let t = 1; t <= 7; t++) {
-            // Taxi Spot Cost (Cohort compounding logic up to schoolCareer limit)
-            const spotTaxi = annualTaxiCost * Math.min(t, schoolCareer);
+            // Taxis Spot Cost: Sum of active cohorts in system (eroded based on their career age)
+            let spotTaxi = 0;
+            for (let age = 1; age <= Math.min(t, schoolCareer); age++) {
+                const cohortTaxis = baseCohortTaxis * Math.pow(1 - erosionRate, age - 1);
+                spotTaxi += cohortTaxis * taxiCostPerDay * schoolDays;
+            }
             cumulativeTaxi += spotTaxi;
 
-            // Appeals Count (Stage progression logic)
-            const s1Count = (affectedPupilsPerYear * s1AppealsRate) * Math.pow(1 - appealsDecay, t - 1);
+            // Appeals Count: intake entering in Year t decays by the erosion rate
+            const cohortIntake = actualAffected * Math.pow(1 - erosionRate, t - 1);
+            const s1Count = cohortIntake * s1AppealsRate;
             const s2Count = s1Count * s2AppealsRate;
             const s3Count = s2Count * s3OmbudRate;
 
             // Appeals Spot Cost
-            const spotS1Cost = s1Count * s1CostPerAppeal;
-            const spotS2Cost = s2Count * s2CostPerAppeal;
-            const spotOmbudCost = s3Count * ombudCostPerAppeal;
-            const spotAppeals = spotS1Cost + spotS2Cost + spotOmbudCost;
+            const spotS1Cost = s1Count * s1Cost;
+            const spotS2Cost = s2Count * s2Cost;
+            const spotS3Cost = s3Count * s3Cost;
+            const spotAppeals = spotS1Cost + spotS2Cost + spotS3Cost;
             cumulativeAppealsTotal += spotAppeals;
 
             // General Admin Cost
             const spotAdmin = ongoingAdminCost;
             cumulativeAdmin += spotAdmin;
 
-            // Claimed Savings (Phased in linearly)
-            const spotCouncilSavings = councilSavingsY7 * (t / 7);
+            // Claimed Savings (Phased in linearly: Savings(t) = peak * t / 7)
+            const spotCouncilSavings = peakSavingsY7 * (t / 7);
             cumulativeCouncilSavings += spotCouncilSavings;
 
             const spotTotal = spotTaxi + spotAppeals + spotAdmin;
@@ -168,9 +159,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 year: t,
                 spotTaxi,
                 cumulativeTaxi,
-                s1Count: Math.round(s1Count),
-                s2Count: Math.round(s2Count),
-                s3Count: Math.round(s3Count),
+                s1Count: Math.round(s1Count * 10) / 10,
+                s2Count: Math.round(s2Count * 10) / 10,
+                s3Count: Math.round(s3Count * 10) / 10,
                 spotAppeals,
                 cumulativeAppeals: cumulativeAppealsTotal,
                 spotAdmin,
@@ -185,12 +176,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         return {
+            actualAffected,
+            baseCohortTaxis,
             annualTaxiCost,
-            s1CostPerAppeal,
-            s2CostPerAppeal,
-            ombudCostPerAppeal,
-            pupilsRequiringTaxiPerDay,
-            taxisRequiredPerDay,
+            s1Cost,
+            s2Cost,
+            s3Cost,
             yearsData
         };
     }
@@ -217,16 +208,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const model = runModel();
         const finalYear = model.yearsData[6]; // Year 7
 
-        // 1. Update KPI panels
+        // Update read-only derived stats in control panel
+        derivedDisplays.actualAffected.textContent = Math.round(model.actualAffected);
+        derivedDisplays.taxisRequired.textContent = (model.baseCohortTaxis).toFixed(1);
+
+        // Update KPI panels
         const cumulative7YearSavings = finalYear.cumulativeNetSavings;
         kpis.netSavings.textContent = formatGBP(cumulative7YearSavings);
         
         if (cumulative7YearSavings < 0) {
             kpis.netSavings.className = 'metric-value deficit-text';
-            kpis.netSavingsLabel.textContent = '7-Year Net Cumulative Deficit';
+            kpis.netSavingsLabel.textContent = '7-Year Net Cumulative Balance (Deficit)';
         } else {
             kpis.netSavings.className = 'metric-value savings-text';
-            kpis.netSavingsLabel.textContent = '7-Year Net Cumulative Savings';
+            kpis.netSavingsLabel.textContent = '7-Year Net Cumulative Balance (Savings)';
         }
 
         kpis.compoundedTaxiCost.textContent = formatGBP(finalYear.cumulativeTaxi);
@@ -238,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalCostsStag = finalYear.cumulativeTotal;
         const pctEaten = (totalCostsStag / totalSavingsClaimed) * 100;
         
-        kpis.costCoverage.textContent = `${pctEaten.toFixed(1)}%`;
+        kpis.costCoverage.textContent = `${pctEaten.toFixed(0)}%`;
         if (pctEaten >= 100) {
             kpis.costCoverage.className = 'metric-value deficit-text';
             kpis.costCoverageLabel.textContent = 'Savings Completely Eradicated';
@@ -250,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
             kpis.costCoverageLabel.textContent = 'Savings Marginal Loss';
         }
 
-        // 2. Populate main breakdown table
+        // Populate main breakdown table
         tables.annualBreakdown.innerHTML = '';
         model.yearsData.forEach(yr => {
             const tr = document.createElement('tr');
@@ -270,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tr.innerHTML = `
                 <td>Year ${yr.year}</td>
                 <td>${formatGBP(activeTaxi)}</td>
-                <td>${yr.s1Count} / ${yr.s2Count} / ${yr.s3Count}</td>
+                <td>${yr.s1Count.toFixed(1)} / ${yr.s2Count.toFixed(1)} / ${yr.s3Count.toFixed(1)}</td>
                 <td>${formatGBP(activeAppeals)}</td>
                 <td>${formatGBP(activeAdmin)}</td>
                 <td style="font-weight: 700;">${formatGBP(activeTotal)}</td>
@@ -280,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tables.annualBreakdown.appendChild(tr);
         });
 
-        // 3. Populate Transport Unit Cost Comparison table
+        // Populate Transport Unit Cost Comparison table
         const annualTaxiPerPupil = (defaults.schoolDays * parseFloat(inputs.taxiCostPerDay.value)) / defaults.pupilsPerTaxi;
         tables.transportComparison.innerHTML = `
             <tr>
@@ -297,29 +292,29 @@ document.addEventListener('DOMContentLoaded', () => {
             </tr>
         `;
 
-        // 4. Populate Appeals / Administrative Costs table
+        // Populate Appeals / Administrative Costs table
         tables.appealsComparison.innerHTML = `
             <tr>
                 <td>Stage 1 (Admin Review)</td>
                 <td>Admissions Presenter</td>
-                <td>4 hrs @ £40/hr</td>
-                <td>${formatGBP(model.s1CostPerAppeal)}</td>
+                <td>Fully loaded staff overhead</td>
+                <td>${formatGBP(model.s1Cost)}</td>
             </tr>
             <tr>
                 <td>Stage 2 (Independent Panel)</td>
                 <td>Clerk + Officer + Travel</td>
-                <td>8h Clerk, 5h Officer, Travel</td>
-                <td>${formatGBP(model.s2CostPerAppeal)}</td>
+                <td>Quasi-judicial hearing prep + sitting</td>
+                <td>${formatGBP(model.s2Cost)}</td>
             </tr>
             <tr>
                 <td>Stage 3 (Ombudsman Inquiry)</td>
                 <td>Info Gov + Legal + CEO</td>
-                <td>7h Info, 4h Legal, 2h CEO</td>
-                <td>${formatGBP(model.ombudCostPerAppeal)}</td>
+                <td>LGSCO compliance & monitoring</td>
+                <td>${formatGBP(model.s3Cost)}</td>
             </tr>
         `;
 
-        // 5. Update Chart.js Data
+        // Update Chart.js Data
         renderChart(model.yearsData);
     }
 
@@ -368,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     labels: labels,
                     datasets: [
                         {
-                            label: 'Council Claimed Savings (Phased)',
+                            label: 'Council Claimed Savings',
                             data: dataClaimed,
                             borderColor: '#a7f432', // lime green
                             backgroundColor: 'rgba(167, 244, 50, 0.05)',
@@ -378,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             fill: false
                         },
                         {
-                            label: 'STAG Projected Cost (Total)',
+                            label: 'STAG Projected Cost (Taxis+Appeals+Admin)',
                             data: dataCosts,
                             borderColor: '#ff2a85', // protest pink
                             backgroundColor: 'rgba(255, 42, 133, 0.05)',
@@ -491,8 +486,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const unit = e.target.dataset.unit || '';
             let valText = e.target.value;
             
-            // Format currency for council savings and taxi costs
-            if (key === 'councilSavingsY7') {
+            // Format displays
+            if (key === 'councilSavingsClaim') {
                 valText = formatGBP(valText);
             } else if (key === 'taxiCostPerDay' || key === 'ongoingAdminCost') {
                 valText = '£' + parseFloat(valText).toLocaleString('en-GB');
@@ -505,21 +500,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Reset controls
     buttons.reset.addEventListener('click', () => {
-        inputs.affectedPupilsPerYear.value = defaults.affectedPupilsPerYear;
-        inputs.pctBespokeTaxis.value = defaults.pctBespokeTaxis * 100;
+        inputs.childrenAffected.value = defaults.childrenAffected;
+        inputs.optOutRate.value = defaults.optOutRate * 100;
+        inputs.erosionRate.value = defaults.erosionRate * 100;
         inputs.taxiCostPerDay.value = defaults.taxiCostPerDay;
         inputs.s1AppealsRate.value = defaults.s1AppealsRate * 100;
         inputs.s2AppealsRate.value = defaults.s2AppealsRate * 100;
         inputs.s3OmbudRate.value = defaults.s3OmbudRate * 100;
-        inputs.appealsDecay.value = defaults.appealsDecay * 100;
         inputs.ongoingAdminCost.value = defaults.ongoingAdminCost;
-        inputs.councilSavingsY7.value = defaults.councilSavingsY7;
+        inputs.councilSavingsClaim.value = defaults.councilSavingsClaim;
 
         // Reset numeric value texts
         Object.keys(inputs).forEach(key => {
             const unit = inputs[key].dataset.unit || '';
             let valText = inputs[key].value;
-            if (key === 'councilSavingsY7') {
+            if (key === 'councilSavingsClaim') {
                 valText = formatGBP(valText);
             } else if (key === 'taxiCostPerDay' || key === 'ongoingAdminCost') {
                 valText = '£' + parseFloat(valText).toLocaleString('en-GB');
@@ -568,7 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
     Object.keys(inputs).forEach(key => {
         const unit = inputs[key].dataset.unit || '';
         let valText = inputs[key].value;
-        if (key === 'councilSavingsY7') {
+        if (key === 'councilSavingsClaim') {
             valText = formatGBP(valText);
         } else if (key === 'taxiCostPerDay' || key === 'ongoingAdminCost') {
             valText = '£' + parseFloat(valText).toLocaleString('en-GB');
