@@ -36,11 +36,11 @@
 
     <header>
         <div class="logo-container">
-            <h1 class="logo-title">S.T.A.G. Financial Model</h1>
+            <h1 class="logo-title">INDEPENDENT COST ANALYSIS MODEL</h1>
             <div class="logo-subtitle">Home to School Transport Policy Audit</div>
         </div>
         <div class="header-meta">
-            <span class="cohort-tag" id="header-warning-tag">North Yorkshire Council Audit</span>
+            <button class="cohort-tag" id="btn-how-it-works" style="cursor: pointer; border: none; outline: none;">How this model works</button>
         </div>
     </header>
 
@@ -422,6 +422,34 @@
             
         </section>
     </main>
+
+    <!-- Modal: How this model works -->
+    <div id="modal-info" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" id="modal-close-btn">&times;</span>
+            <h2 class="modal-title">How This Model Works &amp; Why It Is Accurate</h2>
+            
+            <div class="modal-body">
+                <h3>Overview</h3>
+                <p>This model is an independent financial audit tool designed to evaluate the true fiscal impact of changes to school transport policies. Rather than assuming instant savings and 100% compliance, it models the actual operational transitions, grandfathering clauses, and appeals funnels that occur when transport eligibility rules are changed.</p>
+                
+                <h3>How It Works</h3>
+                <ul>
+                    <li><strong>Cohort-Based Transport Costs:</strong> Since policy changes typically apply only to new intakes, older cohorts continue to run under existing arrangements. The model calculates taxi costs year-by-year, summing the active student cohorts in the system, each eroding by a set rate (attrition) over their 5-year school career.</li>
+                    <li><strong>Chained Appeal Progression:</strong> Disputing transport decisions escalates through three distinct, chained stages: Stage 1 (Internal Review), Stage 2 (Independent Panel), and Stage 3 (Ombudsman). The model chains these rates (e.g., Stage 2 is a percentage of Stage 1, not of the total population) and applies the selected unit costs to each dispute.</li>
+                    <li><strong>Linear Savings Phasing:</strong> Claimed savings do not happen instantly. The model phases in the council's savings claim linearly over the 7-year rollout period, providing a realistic operational timeline.</li>
+                    <li><strong>Ongoing Administration:</strong> Captures the yearly software, mapping, system update, and liaison overheads required to administer a fractured transport network.</li>
+                </ul>
+                
+                <h3>Why It Is Accurate</h3>
+                <ul>
+                    <li><strong>Reflects Fixed Cost Realities:</strong> Large school buses cannot be cancelled immediately if even a few grandfathered students remain on the route. Cohort modeling prevents the model from claiming "day one" bus route savings.</li>
+                    <li><strong>Accurate Appellate Chaining:</strong> By modeling appeals as a funnel (Stage 2 funnels from Stage 1; Ombudsman funnels from Stage 2), the model reflects actual administrative volumes and legal escalation rates.</li>
+                    <li><strong>Audited Cost Parameters:</strong> Default unit costs and dispute rates are derived from audited local government accounts and historic appeals volumes, ensuring realistic baseline projections.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
     <script src="main.js?v=1.0.3"></script>
 </body>

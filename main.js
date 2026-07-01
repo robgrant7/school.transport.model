@@ -832,6 +832,28 @@ function runDashboard() {
         values[key].textContent = `${valText}${unit}`;
     });
     
+    // Modal controls for "How this model works"
+    const modal = document.getElementById('modal-info');
+    const btnHowItWorks = document.getElementById('btn-how-it-works');
+    const closeBtn = document.getElementById('modal-close-btn');
+
+    if (btnHowItWorks && modal && closeBtn) {
+        btnHowItWorks.addEventListener('click', () => {
+            modal.style.display = 'flex';
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        // Close when clicking outside content box
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    }
+
     // Initial render
     updateUI();
 }
