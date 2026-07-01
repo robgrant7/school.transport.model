@@ -33,15 +33,15 @@
                 <div class="slider-container">
                     <div class="slider-header">
                         <span class="slider-label" id="label-affected-pupils">Affected Pupils / Year</span>
-                        <span class="slider-value" id="val-affected-pupils">1200</span>
+                        <span class="slider-value" id="val-affected-pupils">340</span>
                     </div>
-                    <input type="range" id="input-affected-pupils" min="100" max="3000" step="50" value="1200" aria-labelledby="label-affected-pupils">
+                    <input type="range" id="input-affected-pupils" min="50" max="1000" step="10" value="340" aria-labelledby="label-affected-pupils">
                 </div>
             </div>
 
             <!-- Group: Taxi Parameters -->
             <div class="control-group">
-                <div class="control-group-title">Route Fracturing / Taxis</div>
+                <div class="control-group-title">Required Free Transport</div>
                 
                 <div class="slider-container">
                     <div class="slider-header">
@@ -62,22 +62,51 @@
 
             <!-- Group: Appeals Parameters -->
             <div class="control-group">
-                <div class="control-group-title">Dispute Resolution</div>
+                <div class="control-group-title">Appeals Progression Rates</div>
                 
                 <div class="slider-container">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-appeals-y1">Stage 1 Appeals Year 1</span>
-                        <span class="slider-value" id="val-appeals-y1">200</span>
+                        <span class="slider-label" id="label-appeals-rate-s1">S1 Appeal Rate (of affected)</span>
+                        <span class="slider-value" id="val-appeals-rate-s1">16.7%</span>
                     </div>
-                    <input type="range" id="input-appeals-y1" min="0" max="500" step="10" value="200" aria-labelledby="label-appeals-y1">
+                    <input type="range" id="input-appeals-rate-s1" min="0" max="50" step="0.5" value="16.7" data-unit="%" aria-labelledby="label-appeals-rate-s1">
                 </div>
 
                 <div class="slider-container">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-appeals-decay">Appeals Decay Rate / Year</span>
+                        <span class="slider-label" id="label-appeals-rate-s2">S2 Escalation Rate (of S1)</span>
+                        <span class="slider-value" id="val-appeals-rate-s2">45.0%</span>
+                    </div>
+                    <input type="range" id="input-appeals-rate-s2" min="0" max="100" step="1" value="45" data-unit="%" aria-labelledby="label-appeals-rate-s2">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" id="label-appeals-rate-s3">S3 Ombudsman Rate (of S2)</span>
+                        <span class="slider-value" id="val-appeals-rate-s3">33.3%</span>
+                    </div>
+                    <input type="range" id="input-appeals-rate-s3" min="0" max="100" step="1" value="33" data-unit="%" aria-labelledby="label-appeals-rate-s3">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" id="label-appeals-decay">Appeals Decay / Year</span>
                         <span class="slider-value" id="val-appeals-decay">25%</span>
                     </div>
                     <input type="range" id="input-appeals-decay" min="0" max="50" step="5" value="25" data-unit="%" aria-labelledby="label-appeals-decay">
+                </div>
+            </div>
+
+            <!-- Group: Admin Costs -->
+            <div class="control-group">
+                <div class="control-group-title">Admin Costs</div>
+                
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" id="label-admin-cost">Ongoing Admin Cost / Yr</span>
+                        <span class="slider-value" id="val-admin-cost">£20,000</span>
+                    </div>
+                    <input type="range" id="input-admin-cost" min="0" max="100000" step="5000" value="20000" data-unit="" aria-labelledby="label-admin-cost">
                 </div>
             </div>
 
@@ -87,15 +116,15 @@
                 
                 <div class="slider-container">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-council-savings">Council Savings Claim / Yr</span>
-                        <span class="slider-value" id="val-council-savings">£4,100,000</span>
+                        <span class="slider-label" id="label-council-savings">Council Savings Claim at Y7</span>
+                        <span class="slider-value" id="val-council-savings">£3,000,000</span>
                     </div>
-                    <input type="range" id="input-council-savings" min="1000000" max="6000000" step="100000" value="4100000" aria-labelledby="label-council-savings">
+                    <input type="range" id="input-council-savings" min="500000" max="5000000" step="100000" value="3000000" aria-labelledby="label-council-savings">
                 </div>
             </div>
 
             <div class="controls-actions">
-                <button id="btn-reset" class="btn btn-secondary" id="action-reset">Reset Defaults</button>
+                <button id="btn-reset" class="btn btn-secondary">Reset Defaults</button>
             </div>
         </aside>
 
@@ -117,9 +146,15 @@
                 </div>
 
                 <div class="metric-card" id="card-dispute-cost">
-                    <div class="metric-label">Appellate Machinery Cost (7 Yrs)</div>
+                    <div class="metric-label">Appeals Cost (S1+S2+S3) (7 Yrs)</div>
                     <div class="metric-value blue-text" id="kpi-dispute-cost">£495,439</div>
                     <div class="metric-subtext">Staffing, Clerk panels, and Ombudsman reviews</div>
+                </div>
+
+                <div class="metric-card" id="card-admin-cost-panel">
+                    <div class="metric-label">General Admin Cost (7 Yrs)</div>
+                    <div class="metric-value yellow-text" id="kpi-admin-cost">£140,000</div>
+                    <div class="metric-subtext">Software mapping, systems, and liaison</div>
                 </div>
 
                 <div class="metric-card deficit-alert" id="card-cost-coverage">
@@ -167,10 +202,11 @@
                                     <tr>
                                         <th>Year</th>
                                         <th>Taxi Spot/Cum Cost</th>
-                                        <th>Appeals (S1/S2/Ombud)</th>
+                                        <th>Appeals (S1 / S2 / S3) Count</th>
                                         <th>Appeals Spot/Cum Cost</th>
+                                        <th>General Admin Spot/Cum Cost</th>
                                         <th>STAG Projected Cost</th>
-                                        <th>Council Claimed Savings</th>
+                                        <th>Council Claimed Savings (Phased)</th>
                                         <th>Net Savings / Deficit</th>
                                     </tr>
                                 </thead>

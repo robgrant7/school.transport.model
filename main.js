@@ -1,18 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------------------------
-    // Baseline constants and default parameters
+    // Baseline constants and default parameters (Revised)
     // -------------------------------------------------------------
     const defaults = {
-        affectedPupilsPerYear: 1200,
+        affectedPupilsPerYear: 340,
         pctBespokeTaxis: 0.015, // 1.5%
         taxiCostPerDay: 150,
         pupilsPerTaxi: 3,
         schoolDays: 190,
         schoolCareer: 5,
-        s1AppealsY1: 200,
-        appealsDecay: 0.25, // 25%
-        s2AppealsPct: 0.45, // 45%
-        ombudsmanPct: 0.15, // 15%
+        s1AppealsRate: 0.167, // 16.7% of affected pupils
+        s2AppealsRate: 0.450, // 45% of Stage 1
+        s3OmbudRate: 0.333,   // 33.3% of Stage 2
+        appealsDecay: 0.25,   // 25%
         s1Salary: 40,
         s1Hours: 4,
         s2ClerkSalary: 40,
@@ -26,7 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ombudLegalHours: 4,
         ombudCeoSalary: 90,
         ombudCeoHours: 2,
-        councilSavingsPerYear: 4100000
+        ongoingAdminCost: 20000,
+        councilSavingsY7: 3000000
     };
 
     // -------------------------------------------------------------
@@ -36,18 +37,24 @@ document.addEventListener('DOMContentLoaded', () => {
         affectedPupilsPerYear: document.getElementById('input-affected-pupils'),
         pctBespokeTaxis: document.getElementById('input-pct-taxis'),
         taxiCostPerDay: document.getElementById('input-taxi-cost'),
-        s1AppealsY1: document.getElementById('input-appeals-y1'),
+        s1AppealsRate: document.getElementById('input-appeals-rate-s1'),
+        s2AppealsRate: document.getElementById('input-appeals-rate-s2'),
+        s3OmbudRate: document.getElementById('input-appeals-rate-s3'),
         appealsDecay: document.getElementById('input-appeals-decay'),
-        councilSavingsPerYear: document.getElementById('input-council-savings')
+        ongoingAdminCost: document.getElementById('input-admin-cost'),
+        councilSavingsY7: document.getElementById('input-council-savings')
     };
 
     const values = {
         affectedPupilsPerYear: document.getElementById('val-affected-pupils'),
         pctBespokeTaxis: document.getElementById('val-pct-taxis'),
         taxiCostPerDay: document.getElementById('val-taxi-cost'),
-        s1AppealsY1: document.getElementById('val-appeals-y1'),
+        s1AppealsRate: document.getElementById('val-appeals-rate-s1'),
+        s2AppealsRate: document.getElementById('val-appeals-rate-s2'),
+        s3OmbudRate: document.getElementById('val-appeals-rate-s3'),
         appealsDecay: document.getElementById('val-appeals-decay'),
-        councilSavingsPerYear: document.getElementById('val-council-savings')
+        ongoingAdminCost: document.getElementById('val-admin-cost'),
+        councilSavingsY7: document.getElementById('val-council-savings')
     };
 
     const kpis = {
@@ -55,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         netSavingsLabel: document.getElementById('kpi-net-savings-label'),
         compoundedTaxiCost: document.getElementById('kpi-compounded-taxi'),
         disputeCost: document.getElementById('kpi-dispute-cost'),
+        adminCost: document.getElementById('kpi-admin-cost'),
         costCoverage: document.getElementById('kpi-cost-coverage'),
         costCoverageLabel: document.getElementById('kpi-cost-coverage-label')
     };
@@ -83,16 +91,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const affectedPupilsPerYear = parseFloat(inputs.affectedPupilsPerYear.value);
         const pctBespokeTaxis = parseFloat(inputs.pctBespokeTaxis.value) / 100;
         const taxiCostPerDay = parseFloat(inputs.taxiCostPerDay.value);
-        const s1AppealsY1 = parseFloat(inputs.s1AppealsY1.value);
+        const s1AppealsRate = parseFloat(inputs.s1AppealsRate.value) / 100;
+        const s2AppealsRate = parseFloat(inputs.s2AppealsRate.value) / 100;
+        const s3OmbudRate = parseFloat(inputs.s3OmbudRate.value) / 100;
         const appealsDecay = parseFloat(inputs.appealsDecay.value) / 100;
-        const councilSavingsPerYear = parseFloat(inputs.councilSavingsPerYear.value);
+        const ongoingAdminCost = parseFloat(inputs.ongoingAdminCost.value);
+        const councilSavingsY7 = parseFloat(inputs.councilSavingsY7.value);
 
         // Fixed defaults for inner operations (to preserve simplicity in sidebar)
         const pupilsPerTaxi = defaults.pupilsPerTaxi;
         const schoolDays = defaults.schoolDays;
         const schoolCareer = defaults.schoolCareer;
-        const s2AppealsPct = defaults.s2AppealsPct;
-        const ombudsmanPct = defaults.ombudsmanPct;
         const s1Salary = defaults.s1Salary;
         const s1Hours = defaults.s1Hours;
         const s2ClerkSalary = defaults.s2ClerkSalary;
@@ -119,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let cumulativeTaxi = 0;
         let cumulativeAppealsTotal = 0;
+        let cumulativeAdmin = 0;
         let cumulativeCouncilSavings = 0;
 
         const yearsData = [];
@@ -128,23 +138,28 @@ document.addEventListener('DOMContentLoaded', () => {
             const spotTaxi = annualTaxiCost * Math.min(t, schoolCareer);
             cumulativeTaxi += spotTaxi;
 
-            // Appeals count and decay
-            const s1Count = s1AppealsY1 * Math.pow(1 - appealsDecay, t - 1);
-            const s2Count = s1Count * s2AppealsPct;
-            const ombudCount = s1Count * ombudsmanPct;
+            // Appeals Count (Stage progression logic)
+            const s1Count = (affectedPupilsPerYear * s1AppealsRate) * Math.pow(1 - appealsDecay, t - 1);
+            const s2Count = s1Count * s2AppealsRate;
+            const s3Count = s2Count * s3OmbudRate;
 
-            // Appeals cost
+            // Appeals Spot Cost
             const spotS1Cost = s1Count * s1CostPerAppeal;
             const spotS2Cost = s2Count * s2CostPerAppeal;
-            const spotOmbudCost = ombudCount * ombudCostPerAppeal;
+            const spotOmbudCost = s3Count * ombudCostPerAppeal;
             const spotAppeals = spotS1Cost + spotS2Cost + spotOmbudCost;
             cumulativeAppealsTotal += spotAppeals;
 
-            const spotTotal = spotTaxi + spotAppeals;
-            const cumulativeTotal = cumulativeTaxi + cumulativeAppealsTotal;
+            // General Admin Cost
+            const spotAdmin = ongoingAdminCost;
+            cumulativeAdmin += spotAdmin;
 
-            const spotCouncilSavings = councilSavingsPerYear;
+            // Claimed Savings (Phased in linearly)
+            const spotCouncilSavings = councilSavingsY7 * (t / 7);
             cumulativeCouncilSavings += spotCouncilSavings;
+
+            const spotTotal = spotTaxi + spotAppeals + spotAdmin;
+            const cumulativeTotal = cumulativeTaxi + cumulativeAppealsTotal + cumulativeAdmin;
 
             const spotNetSavings = spotCouncilSavings - spotTotal;
             const cumulativeNetSavings = cumulativeCouncilSavings - cumulativeTotal;
@@ -155,9 +170,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 cumulativeTaxi,
                 s1Count: Math.round(s1Count),
                 s2Count: Math.round(s2Count),
-                ombudCount: Math.round(ombudCount),
+                s3Count: Math.round(s3Count),
                 spotAppeals,
                 cumulativeAppeals: cumulativeAppealsTotal,
+                spotAdmin,
+                cumulativeAdmin,
                 spotTotal,
                 cumulativeTotal,
                 spotCouncilSavings,
@@ -214,6 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         kpis.compoundedTaxiCost.textContent = formatGBP(finalYear.cumulativeTaxi);
         kpis.disputeCost.textContent = formatGBP(finalYear.cumulativeAppeals);
+        kpis.adminCost.textContent = formatGBP(finalYear.cumulativeAdmin);
 
         // Cost Coverage KPI (% of the savings eaten by costs)
         const totalSavingsClaimed = finalYear.cumulativeCouncilSavings;
@@ -237,13 +255,14 @@ document.addEventListener('DOMContentLoaded', () => {
         model.yearsData.forEach(yr => {
             const tr = document.createElement('tr');
             
-            // Highlight year 5 onwards as taxi stabilization begins
+            // Highlight final year
             if (yr.year === 7) {
                 tr.className = 'highlight-row';
             }
 
             const activeTaxi = activeViewMode === 'cumulative' ? yr.cumulativeTaxi : yr.spotTaxi;
             const activeAppeals = activeViewMode === 'cumulative' ? yr.cumulativeAppeals : yr.spotAppeals;
+            const activeAdmin = activeViewMode === 'cumulative' ? yr.cumulativeAdmin : yr.spotAdmin;
             const activeTotal = activeViewMode === 'cumulative' ? yr.cumulativeTotal : yr.spotTotal;
             const activeClaimed = activeViewMode === 'cumulative' ? yr.cumulativeCouncilSavings : yr.spotCouncilSavings;
             const activeNet = activeViewMode === 'cumulative' ? yr.cumulativeNetSavings : yr.spotNetSavings;
@@ -251,8 +270,9 @@ document.addEventListener('DOMContentLoaded', () => {
             tr.innerHTML = `
                 <td>Year ${yr.year}</td>
                 <td>${formatGBP(activeTaxi)}</td>
-                <td>${yr.s1Count} / ${yr.s2Count} / ${yr.ombudCount}</td>
+                <td>${yr.s1Count} / ${yr.s2Count} / ${yr.s3Count}</td>
                 <td>${formatGBP(activeAppeals)}</td>
+                <td>${formatGBP(activeAdmin)}</td>
                 <td style="font-weight: 700;">${formatGBP(activeTotal)}</td>
                 <td>${formatGBP(activeClaimed)}</td>
                 <td style="font-weight: 700;" class="${activeNet < 0 ? 'deficit-text' : 'savings-text'}">${formatGBP(activeNet)}</td>
@@ -292,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${formatGBP(model.s2CostPerAppeal)}</td>
             </tr>
             <tr>
-                <td>Ombudsman LGSCO Escalation</td>
+                <td>Stage 3 (Ombudsman Inquiry)</td>
                 <td>Info Gov + Legal + CEO</td>
                 <td>7h Info, 4h Legal, 2h CEO</td>
                 <td>${formatGBP(model.ombudCostPerAppeal)}</td>
@@ -348,7 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     labels: labels,
                     datasets: [
                         {
-                            label: 'Council Claimed Savings',
+                            label: 'Council Claimed Savings (Phased)',
                             data: dataClaimed,
                             borderColor: '#a7f432', // lime green
                             backgroundColor: 'rgba(167, 244, 50, 0.05)',
@@ -358,7 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             fill: false
                         },
                         {
-                            label: 'STAG Projected Cost (Taxis + Appeals)',
+                            label: 'STAG Projected Cost (Total)',
                             data: dataCosts,
                             borderColor: '#ff2a85', // protest pink
                             backgroundColor: 'rgba(255, 42, 133, 0.05)',
@@ -469,7 +489,16 @@ document.addEventListener('DOMContentLoaded', () => {
     Object.keys(inputs).forEach(key => {
         inputs[key].addEventListener('input', (e) => {
             const unit = e.target.dataset.unit || '';
-            values[key].textContent = `${e.target.value}${unit}`;
+            let valText = e.target.value;
+            
+            // Format currency for council savings and taxi costs
+            if (key === 'councilSavingsY7') {
+                valText = formatGBP(valText);
+            } else if (key === 'taxiCostPerDay' || key === 'ongoingAdminCost') {
+                valText = '£' + parseFloat(valText).toLocaleString('en-GB');
+            }
+            
+            values[key].textContent = `${valText}${unit}`;
             updateUI();
         });
     });
@@ -479,14 +508,23 @@ document.addEventListener('DOMContentLoaded', () => {
         inputs.affectedPupilsPerYear.value = defaults.affectedPupilsPerYear;
         inputs.pctBespokeTaxis.value = defaults.pctBespokeTaxis * 100;
         inputs.taxiCostPerDay.value = defaults.taxiCostPerDay;
-        inputs.s1AppealsY1.value = defaults.s1AppealsY1;
+        inputs.s1AppealsRate.value = defaults.s1AppealsRate * 100;
+        inputs.s2AppealsRate.value = defaults.s2AppealsRate * 100;
+        inputs.s3OmbudRate.value = defaults.s3OmbudRate * 100;
         inputs.appealsDecay.value = defaults.appealsDecay * 100;
-        inputs.councilSavingsPerYear.value = defaults.councilSavingsPerYear;
+        inputs.ongoingAdminCost.value = defaults.ongoingAdminCost;
+        inputs.councilSavingsY7.value = defaults.councilSavingsY7;
 
         // Reset numeric value texts
         Object.keys(inputs).forEach(key => {
             const unit = inputs[key].dataset.unit || '';
-            values[key].textContent = `${inputs[key].value}${unit}`;
+            let valText = inputs[key].value;
+            if (key === 'councilSavingsY7') {
+                valText = formatGBP(valText);
+            } else if (key === 'taxiCostPerDay' || key === 'ongoingAdminCost') {
+                valText = '£' + parseFloat(valText).toLocaleString('en-GB');
+            }
+            values[key].textContent = `${valText}${unit}`;
         });
 
         updateUI();
@@ -529,7 +567,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set initial text values matching the slider defaults
     Object.keys(inputs).forEach(key => {
         const unit = inputs[key].dataset.unit || '';
-        values[key].textContent = `${inputs[key].value}${unit}`;
+        let valText = inputs[key].value;
+        if (key === 'councilSavingsY7') {
+            valText = formatGBP(valText);
+        } else if (key === 'taxiCostPerDay' || key === 'ongoingAdminCost') {
+            valText = '£' + parseFloat(valText).toLocaleString('en-GB');
+        }
+        values[key].textContent = `${valText}${unit}`;
     });
     
     // Initial render
