@@ -32,6 +32,9 @@ function runDashboard() {
         s1AppealsRate: document.getElementById('input-appeals-rate-s1'),
         s2AppealsRate: document.getElementById('input-appeals-rate-s2'),
         s3OmbudRate: document.getElementById('input-appeals-rate-s3'),
+        s1Cost: document.getElementById('input-appeals-cost-s1'),
+        s2Cost: document.getElementById('input-appeals-cost-s2'),
+        s3Cost: document.getElementById('input-appeals-cost-s3'),
         ongoingAdminCost: document.getElementById('input-admin-cost'),
         councilSavingsClaim: document.getElementById('input-council-savings')
     };
@@ -44,6 +47,9 @@ function runDashboard() {
         s1AppealsRate: document.getElementById('val-appeals-rate-s1'),
         s2AppealsRate: document.getElementById('val-appeals-rate-s2'),
         s3OmbudRate: document.getElementById('val-appeals-rate-s3'),
+        s1Cost: document.getElementById('val-appeals-cost-s1'),
+        s2Cost: document.getElementById('val-appeals-cost-s2'),
+        s3Cost: document.getElementById('val-appeals-cost-s3'),
         ongoingAdminCost: document.getElementById('val-admin-cost'),
         councilSavingsClaim: document.getElementById('val-council-savings')
     };
@@ -57,11 +63,16 @@ function runDashboard() {
     const kpis = {
         netSavings: document.getElementById('kpi-net-savings'),
         netSavingsLabel: document.getElementById('kpi-net-savings-label'),
+        netSubtext: document.getElementById('kpi-net-subtext'),
+        netStatusBadge: document.getElementById('kpi-net-status-badge'),
         compoundedTaxiCost: document.getElementById('kpi-compounded-taxi'),
         disputeCost: document.getElementById('kpi-dispute-cost'),
         adminCost: document.getElementById('kpi-admin-cost'),
         costCoverage: document.getElementById('kpi-cost-coverage'),
-        costCoverageLabel: document.getElementById('kpi-cost-coverage-label')
+        costCoverageLabel: document.getElementById('kpi-cost-coverage-label'),
+        costCoverageSubtext: document.getElementById('kpi-cost-coverage-subtext'),
+        cardNetBalance: document.getElementById('card-net-balance'),
+        cardCostCoverage: document.getElementById('card-cost-coverage')
     };
 
     const tables = {
@@ -99,9 +110,11 @@ function runDashboard() {
         const pupilsPerTaxi = defaults.pupilsPerTaxi;
         const schoolDays = defaults.schoolDays;
         const schoolCareer = defaults.schoolCareer;
-        const s1Cost = defaults.s1Cost;
-        const s2Cost = defaults.s2Cost;
-        const s3Cost = defaults.s3Cost;
+        
+        // Read appeals unit costs dynamically from inputs
+        const s1Cost = parseFloat(inputs.s1Cost.value);
+        const s2Cost = parseFloat(inputs.s2Cost.value);
+        const s3Cost = parseFloat(inputs.s3Cost.value);
 
         // Derived variables
         const actualAffected = Math.round(childrenAffected * (1 - optOutRate) * 100) / 100;
@@ -218,10 +231,26 @@ function runDashboard() {
         
         if (cumulative7YearSavings < 0) {
             kpis.netSavings.className = 'metric-value deficit-text';
-            kpis.netSavingsLabel.textContent = '7-Year Net Cumulative Balance (Deficit)';
+            kpis.netSavingsLabel.textContent = '7-Year Net Cumulative Balance';
+            kpis.netSubtext.textContent = 'True fiscal outcome after costs are deducted';
+            
+            // Status Badge
+            kpis.netStatusBadge.className = 'metric-status-badge status-deficit';
+            kpis.netStatusBadge.textContent = '🚨 COSTS EXCEED SAVINGS';
+            
+            // Card outline
+            kpis.cardNetBalance.className = 'metric-card deficit-alert';
         } else {
             kpis.netSavings.className = 'metric-value savings-text';
-            kpis.netSavingsLabel.textContent = '7-Year Net Cumulative Balance (Savings)';
+            kpis.netSavingsLabel.textContent = '7-Year Net Cumulative Balance';
+            kpis.netSubtext.textContent = 'True fiscal outcome after costs are deducted';
+            
+            // Status Badge
+            kpis.netStatusBadge.className = 'metric-status-badge status-savings';
+            kpis.netStatusBadge.textContent = '✅ SAVINGS EXCEED COSTS';
+            
+            // Card outline
+            kpis.cardNetBalance.className = 'metric-card savings-alert';
         }
 
         kpis.compoundedTaxiCost.textContent = formatGBP(finalYear.cumulativeTaxi);
@@ -237,12 +266,18 @@ function runDashboard() {
         if (pctEaten >= 100) {
             kpis.costCoverage.className = 'metric-value deficit-text';
             kpis.costCoverageLabel.textContent = 'Savings Completely Eradicated';
+            kpis.costCoverageSubtext.textContent = `Projected costs are ${(pctEaten / 100).toFixed(1)}x higher than savings`;
+            kpis.cardCostCoverage.className = 'metric-card deficit-alert';
         } else if (pctEaten >= 50) {
             kpis.costCoverage.className = 'metric-value yellow-text';
             kpis.costCoverageLabel.textContent = 'Savings Severely Eroded';
+            kpis.costCoverageSubtext.textContent = `Projected costs consume ${pctEaten.toFixed(0)}% of savings`;
+            kpis.cardCostCoverage.className = 'metric-card';
         } else {
             kpis.costCoverage.className = 'metric-value blue-text';
             kpis.costCoverageLabel.textContent = 'Savings Marginal Loss';
+            kpis.costCoverageSubtext.textContent = `Projected costs consume ${pctEaten.toFixed(0)}% of savings`;
+            kpis.cardCostCoverage.className = 'metric-card';
         }
 
         // Populate main breakdown table
@@ -709,7 +744,7 @@ function runDashboard() {
             // Format displays
             if (key === 'councilSavingsClaim') {
                 valText = formatGBP(valText);
-            } else if (key === 'taxiCostPerDay' || key === 'ongoingAdminCost') {
+            } else if (key === 'taxiCostPerDay' || key === 'ongoingAdminCost' || key === 's1Cost' || key === 's2Cost' || key === 's3Cost') {
                 valText = '£' + parseFloat(valText).toLocaleString('en-GB');
             }
             
@@ -730,6 +765,9 @@ function runDashboard() {
         inputs.s1AppealsRate.value = defaults.s1AppealsRate * 100;
         inputs.s2AppealsRate.value = defaults.s2AppealsRate * 100;
         inputs.s3OmbudRate.value = defaults.s3OmbudRate * 100;
+        inputs.s1Cost.value = defaults.s1Cost;
+        inputs.s2Cost.value = defaults.s2Cost;
+        inputs.s3Cost.value = defaults.s3Cost;
         inputs.ongoingAdminCost.value = defaults.ongoingAdminCost;
         inputs.councilSavingsClaim.value = defaults.councilSavingsClaim;
 
@@ -739,7 +777,7 @@ function runDashboard() {
             let valText = inputs[key].value;
             if (key === 'councilSavingsClaim') {
                 valText = formatGBP(valText);
-            } else if (key === 'taxiCostPerDay' || key === 'ongoingAdminCost') {
+            } else if (key === 'taxiCostPerDay' || key === 'ongoingAdminCost' || key === 's1Cost' || key === 's2Cost' || key === 's3Cost') {
                 valText = '£' + parseFloat(valText).toLocaleString('en-GB');
             }
             values[key].textContent = `${valText}${unit}`;
@@ -788,7 +826,7 @@ function runDashboard() {
         let valText = inputs[key].value;
         if (key === 'councilSavingsClaim') {
             valText = formatGBP(valText);
-        } else if (key === 'taxiCostPerDay' || key === 'ongoingAdminCost') {
+        } else if (key === 'taxiCostPerDay' || key === 'ongoingAdminCost' || key === 's1Cost' || key === 's2Cost' || key === 's3Cost') {
             valText = '£' + parseFloat(valText).toLocaleString('en-GB');
         }
         values[key].textContent = `${valText}${unit}`;

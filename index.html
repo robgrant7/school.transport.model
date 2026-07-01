@@ -111,8 +111,9 @@
 
             <!-- Group: Appeals Parameters -->
             <div class="control-group">
-                <div class="control-group-title">Appeals Progression</div>
+                <div class="control-group-title">Appeals Progression & Costs</div>
                 
+                <!-- Rates -->
                 <div class="slider-container">
                     <div class="slider-header">
                         <span class="slider-label" id="label-appeals-rate-s1">S1 Appeal Rate (of actual)</span>
@@ -135,6 +136,31 @@
                         <span class="slider-value" id="val-appeals-rate-s3">20%</span>
                     </div>
                     <input type="range" id="input-appeals-rate-s3" min="0" max="100" step="5" value="20" data-unit="%" aria-labelledby="label-appeals-rate-s3">
+                </div>
+
+                <!-- Unit Costs -->
+                <div class="slider-container" style="border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 12px; margin-top: 12px;">
+                    <div class="slider-header">
+                        <span class="slider-label" id="label-appeals-cost-s1">S1 Appeal Unit Cost</span>
+                        <span class="slider-value" id="val-appeals-cost-s1">£150</span>
+                    </div>
+                    <input type="range" id="input-appeals-cost-s1" min="0" max="1000" step="50" value="150" aria-labelledby="label-appeals-cost-s1">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" id="label-appeals-cost-s2">S2 Appeal Unit Cost</span>
+                        <span class="slider-value" id="val-appeals-cost-s2">£750</span>
+                    </div>
+                    <input type="range" id="input-appeals-cost-s2" min="0" max="3000" step="100" value="750" aria-labelledby="label-appeals-cost-s2">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" id="label-appeals-cost-s3">S3 Ombudsman Unit Cost</span>
+                        <span class="slider-value" id="val-appeals-cost-s3">£1,400</span>
+                    </div>
+                    <input type="range" id="input-appeals-cost-s3" min="0" max="5000" step="100" value="1400" aria-labelledby="label-appeals-cost-s3">
                 </div>
             </div>
 
@@ -177,7 +203,8 @@
                 <div class="metric-card deficit-alert" id="card-net-balance">
                     <div class="metric-label" id="kpi-net-savings-label">7-Year Net Cumulative Balance</div>
                     <div class="metric-value deficit-text" id="kpi-net-savings">-£1,234,567</div>
-                    <div class="metric-subtext">True fiscal outcome after costs are deducted</div>
+                    <div class="metric-subtext" id="kpi-net-subtext">True fiscal outcome after costs are deducted</div>
+                    <div class="metric-status-badge status-deficit" id="kpi-net-status-badge">COSTS EXCEED SAVINGS</div>
                 </div>
                 
                 <div class="metric-card" id="card-taxi-cost">
@@ -201,7 +228,7 @@
                 <div class="metric-card deficit-alert" id="card-cost-coverage">
                     <div class="metric-label" id="kpi-cost-coverage-label">Savings Eaten By Costs</div>
                     <div class="metric-value deficit-text" id="kpi-cost-coverage">584%</div>
-                    <div class="metric-subtext">Percentage of claimed savings consumed</div>
+                    <div class="metric-subtext" id="kpi-cost-coverage-subtext">Percentage of claimed savings consumed</div>
                 </div>
             </div>
 
