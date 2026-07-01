@@ -702,7 +702,7 @@ function runDashboard() {
     // -------------------------------------------------------------
     // Live slider values updates and calculation triggers
     Object.keys(inputs).forEach(key => {
-        inputs[key].addEventListener('input', (e) => {
+        const handleUpdate = (e) => {
             const unit = e.target.dataset.unit || '';
             let valText = e.target.value;
             
@@ -715,7 +715,10 @@ function runDashboard() {
             
             values[key].textContent = `${valText}${unit}`;
             updateUI();
-        });
+        };
+
+        inputs[key].addEventListener('input', handleUpdate);
+        inputs[key].addEventListener('change', handleUpdate);
     });
 
     // Reset controls
