@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+function runDashboard() {
     // -------------------------------------------------------------
     // Baseline constants and default parameters (Final Spreadsheet Spec)
     // -------------------------------------------------------------
@@ -322,159 +322,379 @@ document.addEventListener('DOMContentLoaded', () => {
     // Chart.js Configuration & Rendering
     // -------------------------------------------------------------
     function renderChart(yearsData) {
-        const labels = yearsData.map(y => `Year ${y.year}`);
-        
-        const dataClaimed = yearsData.map(y => activeViewMode === 'cumulative' ? y.cumulativeCouncilSavings : y.spotCouncilSavings);
-        const dataCosts = yearsData.map(y => activeViewMode === 'cumulative' ? y.cumulativeTotal : y.spotTotal);
-        const dataNet = yearsData.map(y => activeViewMode === 'cumulative' ? y.cumulativeNetSavings : y.spotNetSavings);
+        if (typeof Chart === 'undefined') {
+            renderSVGChart(yearsData);
+            return;
+        }
 
-        if (chartInstance) {
-            chartInstance.data.labels = labels;
-            chartInstance.data.datasets[0].data = dataClaimed;
-            chartInstance.data.datasets[1].data = dataCosts;
-            chartInstance.data.datasets[2].data = dataNet;
-            chartInstance.update();
-        } else {
-            const ctx = document.getElementById('model-chart').getContext('2d');
-            
-            // Custom plugin to draw zero line
-            const zeroLinePlugin = {
-                id: 'zeroLine',
-                afterDraw: (chart) => {
-                    const { ctx, scales: { y } } = chart;
-                    const zeroY = y.getPixelForValue(0);
-                    if (zeroY >= chart.chartArea.top && zeroY <= chart.chartArea.bottom) {
-                        ctx.save();
-                        ctx.strokeStyle = '#666666';
-                        ctx.lineWidth = 1.5;
-                        ctx.setLineDash([5, 5]);
-                        ctx.beginPath();
-                        ctx.moveTo(chart.chartArea.left, zeroY);
-                        ctx.lineTo(chart.chartArea.right, zeroY);
-                        ctx.stroke();
-                        ctx.restore();
-                    }
-                }
-            };
+        try {
+            // Hide SVG if present, show Canvas
+            const svg = document.getElementById('model-svg-chart');
+            if (svg) svg.style.display = 'none';
+            const canvas = document.getElementById('model-chart');
+            if (canvas) canvas.style.display = 'block';
 
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Council Claimed Savings',
-                            data: dataClaimed,
-                            borderColor: '#a7f432', // lime green
-                            backgroundColor: 'rgba(167, 244, 50, 0.05)',
-                            borderWidth: 3,
-                            pointBackgroundColor: '#a7f432',
-                            tension: 0.15,
-                            fill: false
-                        },
-                        {
-                            label: 'STAG Projected Cost (Taxis+Appeals+Admin)',
-                            data: dataCosts,
-                            borderColor: '#ff2a85', // protest pink
-                            backgroundColor: 'rgba(255, 42, 133, 0.05)',
-                            borderWidth: 3,
-                            pointBackgroundColor: '#ff2a85',
-                            tension: 0.15,
-                            fill: false
-                        },
-                        {
-                            label: 'True Net Fiscal Balance',
-                            data: dataNet,
-                            borderColor: '#00d2ff', // electric blue
-                            backgroundColor: 'rgba(0, 210, 255, 0.05)',
-                            borderWidth: 4,
-                            pointBackgroundColor: '#00d2ff',
-                            pointRadius: 5,
-                            pointHoverRadius: 7,
-                            tension: 0.15,
-                            fill: true
+            const labels = yearsData.map(y => `Year ${y.year}`);
+            const dataClaimed = yearsData.map(y => activeViewMode === 'cumulative' ? y.cumulativeCouncilSavings : y.spotCouncilSavings);
+            const dataCosts = yearsData.map(y => activeViewMode === 'cumulative' ? y.cumulativeTotal : y.spotTotal);
+            const dataNet = yearsData.map(y => activeViewMode === 'cumulative' ? y.cumulativeNetSavings : y.spotNetSavings);
+
+            if (chartInstance) {
+                chartInstance.data.labels = labels;
+                chartInstance.data.datasets[0].data = dataClaimed;
+                chartInstance.data.datasets[1].data = dataCosts;
+                chartInstance.data.datasets[2].data = dataNet;
+                chartInstance.update();
+            } else {
+                const ctx = document.getElementById('model-chart').getContext('2d');
+                
+                // Custom plugin to draw zero line
+                const zeroLinePlugin = {
+                    id: 'zeroLine',
+                    afterDraw: (chart) => {
+                        const { ctx, scales: { y } } = chart;
+                        const zeroY = y.getPixelForValue(0);
+                        if (zeroY >= chart.chartArea.top && zeroY <= chart.chartArea.bottom) {
+                            ctx.save();
+                            ctx.strokeStyle = '#666666';
+                            ctx.lineWidth = 1.5;
+                            ctx.setLineDash([5, 5]);
+                            ctx.beginPath();
+                            ctx.moveTo(chart.chartArea.left, zeroY);
+                            ctx.lineTo(chart.chartArea.right, zeroY);
+                            ctx.stroke();
+                            ctx.restore();
                         }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            grid: {
-                                color: '#222222'
+                    }
+                };
+
+                chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Council Claimed Savings',
+                                data: dataClaimed,
+                                borderColor: '#a7f432', // lime green
+                                backgroundColor: 'rgba(167, 244, 50, 0.05)',
+                                borderWidth: 3,
+                                pointBackgroundColor: '#a7f432',
+                                tension: 0.15,
+                                fill: false
                             },
-                            ticks: {
-                                color: '#aaaaaa',
-                                font: {
-                                    family: 'Inter',
-                                    size: 11
+                            {
+                                label: 'STAG Projected Cost (Taxis+Appeals+Admin)',
+                                data: dataCosts,
+                                borderColor: '#ff2a85', // protest pink
+                                backgroundColor: 'rgba(255, 42, 133, 0.05)',
+                                borderWidth: 3,
+                                pointBackgroundColor: '#ff2a85',
+                                tension: 0.15,
+                                fill: false
+                            },
+                            {
+                                label: 'True Net Fiscal Balance',
+                                data: dataNet,
+                                borderColor: '#00d2ff', // electric blue
+                                backgroundColor: 'rgba(0, 210, 255, 0.05)',
+                                borderWidth: 4,
+                                pointBackgroundColor: '#00d2ff',
+                                pointRadius: 5,
+                                pointHoverRadius: 7,
+                                tension: 0.15,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                grid: {
+                                    color: '#222222'
+                                },
+                                ticks: {
+                                    color: '#aaaaaa',
+                                    font: {
+                                        family: 'Inter',
+                                        size: 11
+                                    }
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    color: '#222222'
+                                },
+                                ticks: {
+                                    color: '#aaaaaa',
+                                    font: {
+                                        family: 'Inter',
+                                        size: 11
+                                    },
+                                    callback: function(value) {
+                                        return formatGBP(value);
+                                    }
                                 }
                             }
                         },
-                        y: {
-                            grid: {
-                                color: '#222222'
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    color: '#ffffff',
+                                    font: {
+                                        family: 'Inter',
+                                        size: 12,
+                                        weight: 'bold'
+                                    },
+                                    boxWidth: 15,
+                                    padding: 15
+                                }
                             },
-                            ticks: {
-                                color: '#aaaaaa',
-                                font: {
+                            tooltip: {
+                                backgroundColor: '#1a1a1a',
+                                titleColor: '#ffffff',
+                                titleFont: {
                                     family: 'Inter',
-                                    size: 11
+                                    weight: 'bold'
                                 },
-                                callback: function(value) {
-                                    return formatGBP(value);
+                                bodyColor: '#ffffff',
+                                bodyFont: {
+                                    family: 'Inter'
+                                },
+                                borderColor: '#333333',
+                                borderWidth: 1,
+                                padding: 12,
+                                displayColors: true,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += formatGBP(context.parsed.y);
+                                        }
+                                        return label;
+                                    }
                                 }
                             }
                         }
                     },
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                color: '#ffffff',
-                                font: {
-                                    family: 'Inter',
-                                    size: 12,
-                                    weight: 'bold'
-                                },
-                                boxWidth: 15,
-                                padding: 15
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: '#1a1a1a',
-                            titleColor: '#ffffff',
-                            titleFont: {
-                                family: 'Inter',
-                                weight: 'bold'
-                            },
-                            bodyColor: '#ffffff',
-                            bodyFont: {
-                                family: 'Inter'
-                            },
-                            borderColor: '#333333',
-                            borderWidth: 1,
-                            padding: 12,
-                            displayColors: true,
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        label += formatGBP(context.parsed.y);
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    }
-                },
-                plugins: [zeroLinePlugin]
-            });
+                    plugins: [zeroLinePlugin]
+                });
+            }
+        } catch (e) {
+            console.error("Error drawing Chart.js chart, falling back to SVG:", e);
+            renderSVGChart(yearsData);
         }
+    }
+
+    function renderSVGChart(yearsData) {
+        const wrapper = document.querySelector('.chart-wrapper');
+        if (!wrapper) return;
+
+        // Hide canvas if it is present
+        const canvas = document.getElementById('model-chart');
+        if (canvas) canvas.style.display = 'none';
+
+        // Check if our SVG element already exists. If not, create it.
+        let svg = document.getElementById('model-svg-chart');
+        if (!svg) {
+            svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('id', 'model-svg-chart');
+            svg.setAttribute('width', '100%');
+            svg.setAttribute('height', '100%');
+            svg.setAttribute('viewBox', '0 0 800 380');
+            svg.style.backgroundColor = '#1a1a1a';
+            svg.style.borderRadius = '4px';
+            svg.style.border = '1px solid #333';
+            wrapper.appendChild(svg);
+        } else {
+            svg.style.display = 'block';
+        }
+
+        svg.innerHTML = ''; // Clear for redraw
+
+        const labels = yearsData.map(y => `Year ${y.year}`);
+        const dataClaimed = yearsData.map(y => activeViewMode === 'cumulative' ? y.cumulativeCouncilSavings : y.spotCouncilSavings);
+        const dataCosts = yearsData.map(y => activeViewMode === 'cumulative' ? y.cumulativeTotal : y.spotTotal);
+        const dataNet = yearsData.map(y => activeViewMode === 'cumulative' ? y.cumulativeNetSavings : y.spotNetSavings);
+
+        // Find min and max
+        const allValues = [...dataClaimed, ...dataCosts, ...dataNet];
+        let minVal = Math.min(...allValues);
+        let maxVal = Math.max(...allValues);
+        
+        // Add 10% padding
+        const diff = maxVal - minVal;
+        minVal -= diff * 0.1;
+        maxVal += diff * 0.1;
+        
+        if (minVal === maxVal || isNaN(diff)) {
+            minVal = -15000000;
+            maxVal = 5000000;
+        }
+
+        const margin = { left: 90, right: 30, top: 50, bottom: 40 };
+        const width = 800;
+        const height = 380;
+        const graphWidth = width - margin.left - margin.right;
+        const graphHeight = height - margin.top - margin.bottom;
+
+        // Scale functions
+        function getX(index) {
+            return margin.left + index * (graphWidth / 6);
+        }
+
+        function getY(val) {
+            return margin.top + graphHeight - ((val - minVal) / (maxVal - minVal)) * graphHeight;
+        }
+
+        // Draw grid lines and Y axis ticks
+        const ticksCount = 5;
+        for (let i = 0; i <= ticksCount; i++) {
+            const val = minVal + i * (maxVal - minVal) / ticksCount;
+            const yPos = getY(val);
+            
+            // Grid line
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', margin.left);
+            line.setAttribute('y1', yPos);
+            line.setAttribute('x2', width - margin.right);
+            line.setAttribute('y2', yPos);
+            line.setAttribute('stroke', '#2b2b2b');
+            line.setAttribute('stroke-width', '1');
+            svg.appendChild(line);
+
+            // Tick Label
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', margin.left - 10);
+            text.setAttribute('y', yPos + 4);
+            text.setAttribute('text-anchor', 'end');
+            text.setAttribute('fill', '#aaaaaa');
+            text.setAttribute('font-size', '10px');
+            text.setAttribute('font-family', 'Inter');
+            text.textContent = formatGBP(val);
+            svg.appendChild(text);
+        }
+
+        // Draw Zero Line
+        if (minVal < 0 && maxVal > 0) {
+            const zeroY = getY(0);
+            const zeroLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            zeroLine.setAttribute('x1', margin.left);
+            zeroLine.setAttribute('y1', zeroY);
+            zeroLine.setAttribute('x2', width - margin.right);
+            zeroLine.setAttribute('y2', zeroY);
+            zeroLine.setAttribute('stroke', '#666666');
+            zeroLine.setAttribute('stroke-width', '1.5');
+            zeroLine.setAttribute('stroke-dasharray', '5,5');
+            svg.appendChild(zeroLine);
+        }
+
+        // Draw X Axis labels
+        for (let i = 0; i < 7; i++) {
+            const xPos = getX(i);
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', xPos);
+            text.setAttribute('y', height - margin.bottom + 20);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('fill', '#aaaaaa');
+            text.setAttribute('font-size', '10px');
+            text.setAttribute('font-family', 'Inter');
+            text.textContent = `Year ${i+1}`;
+            svg.appendChild(text);
+        }
+
+        // Helper to build SVG path data string
+        function getPathData(data) {
+            return data.map((val, idx) => `${idx === 0 ? 'M' : 'L'} ${getX(idx)} ${getY(val)}`).join(' ');
+        }
+
+        // 1. Council Savings Path (lime green)
+        const pathClaimed = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        pathClaimed.setAttribute('d', getPathData(dataClaimed));
+        pathClaimed.setAttribute('fill', 'none');
+        pathClaimed.setAttribute('stroke', '#a7f432');
+        pathClaimed.setAttribute('stroke-width', '3');
+        svg.appendChild(pathClaimed);
+
+        // 2. STAG Projected Cost Path (protest pink)
+        const pathCosts = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        pathCosts.setAttribute('d', getPathData(dataCosts));
+        pathCosts.setAttribute('fill', 'none');
+        pathCosts.setAttribute('stroke', '#ff2a85');
+        pathCosts.setAttribute('stroke-width', '3');
+        svg.appendChild(pathCosts);
+
+        // 3. Net Savings Area Path
+        const areaData = getPathData(dataNet) + ` L ${getX(6)} ${getY(minVal)} L ${getX(0)} ${getY(minVal)} Z`;
+        const areaNet = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        areaNet.setAttribute('d', areaData);
+        areaNet.setAttribute('fill', 'rgba(0, 210, 255, 0.03)');
+        svg.appendChild(areaNet);
+
+        // 4. Net Savings Line Path (electric blue)
+        const pathNet = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        pathNet.setAttribute('d', getPathData(dataNet));
+        pathNet.setAttribute('fill', 'none');
+        pathNet.setAttribute('stroke', '#00d2ff');
+        pathNet.setAttribute('stroke-width', '4');
+        svg.appendChild(pathNet);
+
+        // Draw Circles and text values at data points for Net Balance
+        dataNet.forEach((val, idx) => {
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', getX(idx));
+            circle.setAttribute('cy', getY(val));
+            circle.setAttribute('r', '4');
+            circle.setAttribute('fill', '#00d2ff');
+            svg.appendChild(circle);
+            
+            const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            txt.setAttribute('x', getX(idx));
+            txt.setAttribute('y', getY(val) - 10);
+            txt.setAttribute('text-anchor', 'middle');
+            txt.setAttribute('fill', '#ffffff');
+            txt.setAttribute('font-size', '9px');
+            txt.setAttribute('font-family', 'Inter');
+            txt.textContent = formatGBP(val);
+            svg.appendChild(txt);
+        });
+
+        // Draw Legend
+        const legendItems = [
+            { label: 'Council Claimed Savings', color: '#a7f432' },
+            { label: 'STAG Projected Cost', color: '#ff2a85' },
+            { label: 'True Net Fiscal Balance', color: '#00d2ff' }
+        ];
+
+        legendItems.forEach((item, idx) => {
+            const legX = margin.left + idx * 210;
+            
+            // Color indicator
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', legX);
+            rect.setAttribute('y', 15);
+            rect.setAttribute('width', '15');
+            rect.setAttribute('height', '10');
+            rect.setAttribute('fill', item.color);
+            svg.appendChild(rect);
+
+            // Label text
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', legX + 22);
+            text.setAttribute('y', 24);
+            text.setAttribute('fill', '#ffffff');
+            text.setAttribute('font-size', '11px');
+            text.setAttribute('font-family', 'Inter');
+            text.setAttribute('font-weight', 'bold');
+            text.textContent = item.label;
+            svg.appendChild(text);
+        });
     }
 
     // -------------------------------------------------------------
@@ -573,4 +793,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initial render
     updateUI();
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runDashboard);
+} else {
+    runDashboard();
+}
