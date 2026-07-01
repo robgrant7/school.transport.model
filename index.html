@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STAG School Transport Financial Model Dashboard</title>
+    <meta name="description" content="An interactive, data-driven financial model auditing the claims of North Yorkshire Council's school transport policy shift from catchment to nearest school only.">
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <h1 class="logo-title">S.T.A.G. Financial Model</h1>
+            <div class="logo-subtitle">Home to School Transport Policy Audit</div>
+        </div>
+        <div class="header-meta">
+            <span class="cohort-tag" id="header-warning-tag">North Yorkshire Council Audit</span>
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+        <!-- Control Panel Sidebar -->
+        <aside class="controls-sidebar">
+            <h2 class="section-title">Model Parameters</h2>
+            
+            <!-- Group: Affected cohort -->
+            <div class="control-group">
+                <div class="control-group-title">Pupil Demographics</div>
+                
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" id="label-affected-pupils">Affected Pupils / Year</span>
+                        <span class="slider-value" id="val-affected-pupils">1200</span>
+                    </div>
+                    <input type="range" id="input-affected-pupils" min="100" max="3000" step="50" value="1200" aria-labelledby="label-affected-pupils">
+                </div>
+            </div>
+
+            <!-- Group: Taxi Parameters -->
+            <div class="control-group">
+                <div class="control-group-title">Route Fracturing / Taxis</div>
+                
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" id="label-pct-taxis">% Requiring Bespoke Taxi</span>
+                        <span class="slider-value" id="val-pct-taxis">1.5%</span>
+                    </div>
+                    <input type="range" id="input-pct-taxis" min="0" max="10" step="0.1" value="1.5" data-unit="%" aria-labelledby="label-pct-taxis">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" id="label-taxi-cost">Bespoke Taxi Cost / Day</span>
+                        <span class="slider-value" id="val-taxi-cost">£150</span>
+                    </div>
+                    <input type="range" id="input-taxi-cost" min="50" max="400" step="10" value="150" data-unit="" aria-labelledby="label-taxi-cost">
+                </div>
+            </div>
+
+            <!-- Group: Appeals Parameters -->
+            <div class="control-group">
+                <div class="control-group-title">Dispute Resolution</div>
+                
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" id="label-appeals-y1">Stage 1 Appeals Year 1</span>
+                        <span class="slider-value" id="val-appeals-y1">200</span>
+                    </div>
+                    <input type="range" id="input-appeals-y1" min="0" max="500" step="10" value="200" aria-labelledby="label-appeals-y1">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" id="label-appeals-decay">Appeals Decay Rate / Year</span>
+                        <span class="slider-value" id="val-appeals-decay">25%</span>
+                    </div>
+                    <input type="range" id="input-appeals-decay" min="0" max="50" step="5" value="25" data-unit="%" aria-labelledby="label-appeals-decay">
+                </div>
+            </div>
+
+            <!-- Group: Council Savings Claim -->
+            <div class="control-group">
+                <div class="control-group-title">Claimed Savings Base</div>
+                
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" id="label-council-savings">Council Savings Claim / Yr</span>
+                        <span class="slider-value" id="val-council-savings">£4,100,000</span>
+                    </div>
+                    <input type="range" id="input-council-savings" min="1000000" max="6000000" step="100000" value="4100000" aria-labelledby="label-council-savings">
+                </div>
+            </div>
+
+            <div class="controls-actions">
+                <button id="btn-reset" class="btn btn-secondary" id="action-reset">Reset Defaults</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Panel -->
+        <section class="main-dashboard">
+            
+            <!-- Metric KPI Summary Row -->
+            <div class="metrics-row">
+                <div class="metric-card deficit-alert" id="card-net-balance">
+                    <div class="metric-label" id="kpi-net-savings-label">7-Year Net Cumulative Balance</div>
+                    <div class="metric-value deficit-text" id="kpi-net-savings">-£1,234,567</div>
+                    <div class="metric-subtext">True fiscal outcome after costs are deducted</div>
+                </div>
+                
+                <div class="metric-card" id="card-taxi-cost">
+                    <div class="metric-label">Compounded Taxi Cost (7 Yrs)</div>
+                    <div class="metric-value yellow-text" id="kpi-compounded-taxi">£4,275,000</div>
+                    <div class="metric-subtext">Due to route fracturing and rural isolation</div>
+                </div>
+
+                <div class="metric-card" id="card-dispute-cost">
+                    <div class="metric-label">Appellate Machinery Cost (7 Yrs)</div>
+                    <div class="metric-value blue-text" id="kpi-dispute-cost">£495,439</div>
+                    <div class="metric-subtext">Staffing, Clerk panels, and Ombudsman reviews</div>
+                </div>
+
+                <div class="metric-card deficit-alert" id="card-cost-coverage">
+                    <div class="metric-label" id="kpi-cost-coverage-label">Savings Eaten By Costs</div>
+                    <div class="metric-value deficit-text" id="kpi-cost-coverage">116%</div>
+                    <div class="metric-subtext">Percentage of claimed savings consumed</div>
+                </div>
+            </div>
+
+            <!-- Projection Chart Card -->
+            <div class="visuals-row">
+                <div class="card" id="card-chart">
+                    <div class="card-title">
+                        <span>7-Year Policy Financial Projection</span>
+                        <div class="controls-actions" style="margin-top: 0;">
+                            <button id="btn-view-cumulative" class="btn btn-secondary active" style="padding: 6px 12px; font-size: 0.7rem;">Cumulative View</button>
+                            <button id="btn-view-annual" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.7rem;">Annual View</button>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="model-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Details Tabs System -->
+            <div class="tab-container" id="tabs-details">
+                <div class="tab-headers">
+                    <button class="tab-header active" data-tab="projection" id="tab-btn-projection">7-Year Breakdown Table</button>
+                    <button class="tab-header" data-tab="taxis" id="tab-btn-taxis">Transport Unit Costs</button>
+                    <button class="tab-header" data-tab="appeals" id="tab-btn-appeals">Administrative Overhead</button>
+                    <button class="tab-header" data-tab="strategy" id="tab-btn-strategy">Strategic Audit Briefing</button>
+                </div>
+
+                <!-- Tab Panel 1: Breakdown Table -->
+                <div class="tab-panel active" id="tab-panel-projection">
+                    <div class="card">
+                        <div class="card-title">
+                            <span>Annual Financial Breakdown</span>
+                            <span class="card-title-badge">Dynamic Output</span>
+                        </div>
+                        <div class="table-wrapper">
+                            <table id="table-annual-breakdown">
+                                <thead>
+                                    <tr>
+                                        <th>Year</th>
+                                        <th>Taxi Spot/Cum Cost</th>
+                                        <th>Appeals (S1/S2/Ombud)</th>
+                                        <th>Appeals Spot/Cum Cost</th>
+                                        <th>STAG Projected Cost</th>
+                                        <th>Council Claimed Savings</th>
+                                        <th>Net Savings / Deficit</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-annual-breakdown-body">
+                                    <!-- Dynamic rows from main.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Panel 2: Taxis -->
+                <div class="tab-panel" id="tab-panel-taxis">
+                    <div class="card">
+                        <div class="card-title">
+                            <span>Unit Cost Escalation: Legacy vs. Fragmented</span>
+                            <span class="card-title-badge">Operational Realities</span>
+                        </div>
+                        <p style="margin-bottom: 15px; font-size: 0.9rem; color: var(--text-secondary);">
+                            Transitioning to a "nearest school only" policy fractures bus routes. Instead of transporting children on large-capacity coaches, the council is forced to commission bespoke daily taxi contracts for isolated rural pupils, resulting in a **1,390% increase** in per-pupil transport costs.
+                        </p>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Transport Type</th>
+                                        <th>Average Capacity</th>
+                                        <th>Annual Vehicle Cost</th>
+                                        <th>Annual Cost Per Head</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-transport-comparison-body">
+                                    <!-- Dynamic rows from main.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Panel 3: Appeals -->
+                <div class="tab-panel" id="tab-panel-appeals">
+                    <div class="card">
+                        <div class="card-title">
+                            <span>Dispute Resolution / Administrative Machinery Overhead</span>
+                            <span class="card-title-badge">Appellate Costs</span>
+                        </div>
+                        <p style="margin-bottom: 15px; font-size: 0.9rem; color: var(--text-secondary);">
+                            Excluding families from free transport triggers a massive pipeline of administrative appeals. Processing these appeals consumes thousands of officer hours, clerk resources, and senior management reviews.
+                        </p>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Appellate Stage</th>
+                                        <th>Staff Requirements</th>
+                                        <th>Processing Model</th>
+                                        <th>Fully Loaded Unit Cost</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-appeals-comparison-body">
+                                    <!-- Dynamic rows from main.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Panel 4: Strategy Context -->
+                <div class="tab-panel" id="tab-panel-strategy">
+                    <div class="info-grid">
+                        <div class="info-box">
+                            <div class="info-box-title">
+                                <span>⚠️ The "100% Behavioural Compliance" Trap</span>
+                            </div>
+                            <p>The council's financial model assumes that 100% of affected families will accept losing transport and fund their own travel to their catchment school.</p>
+                            <div class="info-box-highlight warning">
+                                If parents instead enroll their children in their new "nearest" school to secure free transport, the council must commission new, un-optimised routes, driving up costs.
+                            </div>
+                        </div>
+
+                        <div class="info-box">
+                            <div class="info-box-title">
+                                <span>⏳ The Cohort Lag Paradox</span>
+                            </div>
+                            <p>Because the policy applies only to new intake pupils, large capacity buses must continue running the same routes at 100% contract costs to service grandfathered cohorts.</p>
+                            <div class="info-box-highlight warning">
+                                The council's model falsely reports immediate savings on routes where vehicle contract costs remain entirely fixed for years.
+                            </div>
+                        </div>
+
+                        <div class="info-box">
+                            <div class="info-box-title">
+                                <span>💷 Cross-Border Funding Drain</span>
+                            </div>
+                            <p>For border families, the nearest school often falls inside a neighboring local authority, directing pupil funding away from North Yorkshire schools.</p>
+                            <div class="info-box-highlight warning">
+                                NYC effectively exports <span class="highlight-val">£6,500</span> per pupil annually straight to competing neighboring councils.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sign-off Protest section -->
+            <div class="signoff-section">
+                <div class="signoff-logo">School Transport Action Group</div>
+                <div class="signoff-signature">Reinstating Catchment-Based Transport for North Yorkshire Families</div>
+            </div>
+            
+        </section>
+    </main>
+
+    <script src="main.js"></script>
+</body>
+</html>

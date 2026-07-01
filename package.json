@@ -1,0 +1,19 @@
+{
+  "name": "stag-school-transport-model",
+  "version": "1.0.0",
+  "description": "Interactive Financial Model Dashboard for School Transport Action Group",
+  "main": "main.js",
+  "scripts": {
+    "start": "npx http-server -p 8000",
+    "dev": "npx http-server -p 8000"
+  },
+  "keywords": [
+    "stag",
+    "school",
+    "transport",
+    "model",
+    "finance"
+  ],
+  "author": "STAG",
+  "license": "MIT"
+}
