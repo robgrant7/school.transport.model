@@ -30,22 +30,15 @@ Rather than assuming day-one savings, the model phases in the council's savings 
 
 The STAG model calculates the true cost of policy implementation by summing three distinct overheads:
 
-### 1. Alternative Vehicle Costs (Cohort-Based)
-When the council cancels a large-capacity bus route to restrict travel to the "nearest school only," grandfathered pupils on that route must still be transported. The remaining pupils are displaced onto smaller alternative vehicles (e.g., taxis or mini-buses), which are operationally inefficient.
+### 1. Alternative Vehicle Costs (Volume-Based Geographic Scaling)
+When the council cancels a large-capacity bus route to restrict travel to the "nearest school only," grandfathered pupils on that route must still be transported. Instead of assuming county-wide efficiency, the model partitions the population into distinct rural zones (representing primary feeder clusters) to simulate local routing realities.
 
-*   **Displaced Intake**: Each year, the number of new displaced pupils entering the system is calculated as:
-    \[
-    \text{Cohort Intake} = \text{Children Affected} \times (1 - \text{Opt-Out Rate})
-    \]
-*   **Cohort Stack**: Since a school career lasts 5 years, the number of active, overlapping cohorts grows each year, peaking at Year 5 (and continuing to Year 8) with 5 concurrent cohorts.
-*   **Erosion**: Each cohort shrinks in size by the selected **Erosion Rate** for each subsequent year they remain in the school system:
-    \[
-    \text{Cohort Size at Age } a = \text{Cohort Intake} \times (1 - \text{Erosion Rate})^{a - 1}
-    \]
-*   **Vehicle Capacity**: The number of vehicles required for the active student population is determined by **Pupils per Alt Vehicle**. The total annual cost is:
-    \[
-    \text{Annual Vehicle Cost} = \text{Vehicles Required} \times \text{Daily Contract Cost} \times 190 \text{ school days}
-    \]
+*   **Active Pupils per Zone**: The total active displaced cohort population in Year $t$ is divided equally across the **Feeder Zones / Clusters** (default: 50).
+*   **Rural Isolation**: A percentage of the zone's population (defined by the **Isolation Rate**, default 25%) live down remote single-track roads or lanes, requiring individual standard Taxis (capacity: 3).
+*   **Consolidation Group**: The remaining pupils in the zone (non-isolated) travel together:
+    *   If their number is **less than the Minibus Threshold** (default: 8), they are transported using standard Taxis (capacity: 3) at the standard contract rate.
+    *   If their number is **greater than or equal to the Minibus Threshold**, they consolidate into a larger vehicle and are automatically upgraded to a Minibus contract (capacity: 16; contract cost: 1.5x of the standard vehicle cost).
+*   **Aggregation**: Taxis and Minibus contracts are summed for a single zone, multiplied by the **number of zones**, and multiplied by **190 school days** to compute the annual spot vehicle cost for Year $t$.
 
 ### 2. Chained Appeals Overhead
 Families who lose free transport rights can appeal the council's decision. This cost is calculated as a sequential funnel:
