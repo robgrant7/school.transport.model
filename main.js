@@ -7,7 +7,7 @@ function runDashboard() {
         optOutRate: 0.70,     // 70%
         observationWindow: 8, // 8 years
         vehicleCostPerDay: 150, // Taxi Cost / Day
-        pupilsPerAltVehicle: 3, // Pupils per Taxi
+        pupilsPerAltVehicle: 2, // Pupils per Taxi
         minibusCostPerDay: 250,
         pupilsPerMinibus: 16,
         minibusThreshold: 8,
