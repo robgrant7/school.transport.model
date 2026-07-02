@@ -325,8 +325,10 @@ function runDashboard() {
             const activeClaimed = activeViewMode === 'cumulative' ? yr.cumulativeCouncilSavings : yr.spotCouncilSavings;
             const activeNet = activeViewMode === 'cumulative' ? yr.cumulativeNetSavings : yr.spotNetSavings;
 
+            const academicYears = ["2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"];
+            const yrLabel = academicYears[yr.year - 1] || `Year ${yr.year}`;
             tr.innerHTML = `
-                <td>Year ${yr.year}</td>
+                <td>${yrLabel}</td>
                 <td>${formatGBP(activeVehicle)}</td>
                 <td>${yr.s1Count.toFixed(1)} / ${yr.s2Count.toFixed(1)} / ${yr.s3Count.toFixed(1)}</td>
                 <td>${formatGBP(activeAppeals)}</td>
@@ -561,7 +563,8 @@ function runDashboard() {
             const canvas = document.getElementById('model-chart');
             if (canvas) canvas.style.display = 'block';
 
-            const labels = yearsData.map(y => `Year ${y.year}`);
+            const academicYears = ["2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"];
+            const labels = yearsData.map(y => academicYears[y.year - 1] || `Year ${y.year}`);
             const dataClaimed = yearsData.map(y => activeViewMode === 'cumulative' ? y.cumulativeCouncilSavings : y.spotCouncilSavings);
             const dataCosts = yearsData.map(y => activeViewMode === 'cumulative' ? y.cumulativeTotal : y.spotTotal);
             const dataNet = yearsData.map(y => activeViewMode === 'cumulative' ? y.cumulativeNetSavings : y.spotNetSavings);
@@ -745,7 +748,8 @@ function runDashboard() {
 
         svg.innerHTML = ''; // Clear for redraw
 
-        const labels = yearsData.map(y => `Year ${y.year}`);
+        const academicYears = ["2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"];
+        const labels = yearsData.map(y => academicYears[y.year - 1] || `Year ${y.year}`);
         const dataClaimed = yearsData.map(y => activeViewMode === 'cumulative' ? y.cumulativeCouncilSavings : y.spotCouncilSavings);
         const dataCosts = yearsData.map(y => activeViewMode === 'cumulative' ? y.cumulativeTotal : y.spotTotal);
         const dataNet = yearsData.map(y => activeViewMode === 'cumulative' ? y.cumulativeNetSavings : y.spotNetSavings);
@@ -832,7 +836,8 @@ function runDashboard() {
             text.setAttribute('fill', '#aaaaaa');
             text.setAttribute('font-size', '10px');
             text.setAttribute('font-family', 'Inter');
-            text.textContent = `Year ${i+1}`;
+            const academicYears = ["2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"];
+            text.textContent = academicYears[i] || `Year ${i+1}`;
             svg.appendChild(text);
         }
 
