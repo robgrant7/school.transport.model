@@ -18,7 +18,10 @@ function runDashboard() {
         s2Cost: 750,
         s3Cost: 1400,
         ongoingAdminCost: 20000,
-        councilSavingsClaim: 4263445 // Annual savings at Year 8 maturity
+        councilSavingsClaim: 4263445, // Annual savings at Year 8 maturity
+        numberOfZones: 50,
+        isolationRate: 0.25,
+        minibusThreshold: 8
     };
 
     // -------------------------------------------------------------
@@ -37,7 +40,10 @@ function runDashboard() {
         s2Cost: document.getElementById('input-appeals-cost-s2'),
         s3Cost: document.getElementById('input-appeals-cost-s3'),
         ongoingAdminCost: document.getElementById('input-admin-cost'),
-        councilSavingsClaim: document.getElementById('input-council-savings')
+        councilSavingsClaim: document.getElementById('input-council-savings'),
+        numberOfZones: document.getElementById('input-num-zones'),
+        isolationRate: document.getElementById('input-isolation-rate'),
+        minibusThreshold: document.getElementById('input-minibus-threshold')
     };
 
     const values = {
@@ -53,7 +59,10 @@ function runDashboard() {
         s2Cost: document.getElementById('val-appeals-cost-s2'),
         s3Cost: document.getElementById('val-appeals-cost-s3'),
         ongoingAdminCost: document.getElementById('val-admin-cost'),
-        councilSavingsClaim: document.getElementById('val-council-savings')
+        councilSavingsClaim: document.getElementById('val-council-savings'),
+        numberOfZones: document.getElementById('val-num-zones'),
+        isolationRate: document.getElementById('val-isolation-rate'),
+        minibusThreshold: document.getElementById('val-minibus-threshold')
     };
 
     // Calculated read-only values in control panel
@@ -111,6 +120,9 @@ function runDashboard() {
         const s3OmbudRate = parseFloat(inputs.s3OmbudRate.value) / 100;
         const ongoingAdminCost = parseFloat(inputs.ongoingAdminCost.value);
         const councilSavingsClaim = parseFloat(inputs.councilSavingsClaim.value);
+        const numberOfZones = parseFloat(inputs.numberOfZones.value);
+        const isolationRate = parseFloat(inputs.isolationRate.value) / 100;
+        const minibusThreshold = parseFloat(inputs.minibusThreshold.value);
 
         // Fixed defaults for inner operations (to preserve simplicity in sidebar)
         const schoolDays = defaults.schoolDays;
@@ -123,8 +135,21 @@ function runDashboard() {
 
         // Derived variables
         const actualAffected = Math.round(childrenAffected * (1 - optOutRate) * 100) / 100;
-        const baseCohortVehicles = actualAffected / pupilsPerAltVehicle;
-        const annualVehicleCost = baseCohortVehicles * vehicleCostPerDay * schoolDays;
+        
+        // Calculate Base Cohort Vehicles (Year 1) dynamically using zone partitioning
+        const baseCohortPop = actualAffected / numberOfZones;
+        const baseIsolated = baseCohortPop * isolationRate;
+        const baseIsolatedTaxis = baseIsolated / 3;
+        const baseRemaining = baseCohortPop - baseIsolated;
+        let baseGroupTaxis = 0;
+        let baseGroupMinibuses = 0;
+        if (baseRemaining < minibusThreshold) {
+            baseGroupTaxis = baseRemaining / 3;
+        } else {
+            baseGroupMinibuses = baseRemaining / 16;
+        }
+        const baseCohortVehicles = (baseIsolatedTaxis + baseGroupTaxis + baseGroupMinibuses) * numberOfZones;
+        const annualVehicleCost = numberOfZones * ( (baseIsolatedTaxis + baseGroupTaxis) * vehicleCostPerDay + baseGroupMinibuses * (vehicleCostPerDay * 1.5) ) * schoolDays;
 
         // Phased council savings weights matching the spreadsheet implementation steps
         const savingsPhasingWeights = [
@@ -148,10 +173,22 @@ function runDashboard() {
         for (let t = 1; t <= 8; t++) {
             // Alternative Vehicles Spot Cost: Sum of active cohorts in system (eroded based on their career age)
             let spotVehicle = 0;
+            let zonePop = 0;
             for (let age = 1; age <= Math.min(t, schoolCareer); age++) {
-                const cohortVehicles = baseCohortVehicles * Math.pow(1 - erosionRate, age - 1);
-                spotVehicle += cohortVehicles * vehicleCostPerDay * schoolDays;
+                zonePop += (actualAffected * Math.pow(1 - erosionRate, age - 1)) / numberOfZones;
             }
+            const isolatedPupils = zonePop * isolationRate;
+            const isolatedTaxis = isolatedPupils / 3;
+            const remPupils = zonePop - isolatedPupils;
+            let groupTaxis = 0;
+            let groupMinibuses = 0;
+            if (remPupils < minibusThreshold) {
+                groupTaxis = remPupils / 3;
+            } else {
+                groupMinibuses = remPupils / 16;
+            }
+            const layerCostPerZone = (isolatedTaxis + groupTaxis) * vehicleCostPerDay + groupMinibuses * (vehicleCostPerDay * 1.5);
+            spotVehicle = layerCostPerZone * numberOfZones * schoolDays;
             cumulativeVehicle += spotVehicle;
 
             // Appeals Count: intake entering in Year t decays by the erosion rate
@@ -430,11 +467,27 @@ function runDashboard() {
         ];
         const phasedSavingsY1 = councilSavingsClaim * savingsPhasingWeights[0];
         
+        const numberOfZones = parseFloat(inputs.numberOfZones.value);
+        const isolationRate = parseFloat(inputs.isolationRate.value);
+        const minibusThreshold = parseFloat(inputs.minibusThreshold.value);
+
         const totalCostY1 = annualVehicleCost + totalAppealsCost + ongoingAdminCost;
         const netY1 = phasedSavingsY1 - totalCostY1;
 
         const bodyElement = document.getElementById('modal-year1-body');
         if (!bodyElement) return;
+
+        const zoneCohortPop = actualAffected / numberOfZones;
+        const isolatedPupils = zoneCohortPop * (isolationRate / 100);
+        const isolatedTaxis = isolatedPupils / 3;
+        const remPupils = zoneCohortPop - isolatedPupils;
+        let groupTaxis = 0;
+        let groupMinibuses = 0;
+        if (remPupils < minibusThreshold) {
+            groupTaxis = remPupils / 3;
+        } else {
+            groupMinibuses = remPupils / 16;
+        }
 
         bodyElement.innerHTML = `
             <p style="margin-bottom: 20px; font-size: 0.95rem;">Below is the exact step-by-step arithmetic showing how the Year 1 figures are calculated from your current slider parameters. All calculations are rounded to the nearest pound.</p>
@@ -460,21 +513,23 @@ function runDashboard() {
             <ul style="list-style-type: none; padding-left: 0; margin-bottom: 15px;">
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
-                    <strong>Pupils per Alt Vehicle:</strong> Each alternative vehicle holds an average of ${pupilsPerAltVehicle} pupils.
+                    <strong>Geographic Partition:</strong> The displaced cohort is split across ${numberOfZones} rural clusters, yielding <strong style="color: var(--text-primary);">${zoneCohortPop.toFixed(2)} pupils</strong> per zone.
                 </li>
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
-                    <strong>Alternative Vehicles Required:</strong> <strong style="color: var(--text-primary);">${baseCohortVehicles.toFixed(1)} vehicles</strong> must be commissioned.<br>
-                    <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">Formula: ${actualAffected.toFixed(1)} / ${pupilsPerAltVehicle} = ${baseCohortVehicles.toFixed(1)}</span>
+                    <strong>Rural Isolation:</strong> ${isolationRate}% of pupils (${isolatedPupils.toFixed(2)} per zone) require <strong style="color: var(--text-primary);">${isolatedTaxis.toFixed(2)} isolated Taxis</strong> (capacity 3).
                 </li>
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
-                    <strong>Daily Cost:</strong> £${vehicleCostPerDay} per day per vehicle contract.
+                    <strong>Consolidation Group:</strong> The remaining ${remPupils.toFixed(2)} pupils per zone are ${remPupils < minibusThreshold ? 'below' : 'above/equal to'} the minibus threshold of ${minibusThreshold}. They utilize <strong style="color: var(--text-primary);">${remPupils < minibusThreshold ? `${groupTaxis.toFixed(2)} Taxis` : `${groupMinibuses.toFixed(2)} Minibuses (at 1.5x cost)`}</strong>.
                 </li>
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
-                    <strong>Annual Transport Cost:</strong> <strong style="color: var(--text-primary);">${formatGBP(annualVehicleCost)}</strong> for Year 1 (190 school days).<br>
-                    <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">Formula: ${baseCohortVehicles.toFixed(1)} vehicles × £${vehicleCostPerDay} × 190 days = ${formatGBP(annualVehicleCost)}</span>
+                    <strong>Total Vehicles:</strong> across all ${numberOfZones} zones, we require <strong style="color: var(--text-primary);">${baseCohortVehicles.toFixed(1)} vehicles</strong>.
+                </li>
+                <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
+                    <strong>Annual Transport Cost:</strong> <strong style="color: var(--text-primary);">${formatGBP(annualVehicleCost)}</strong> for Year 1 (190 school days).
                 </li>
             </ul>
 
@@ -943,7 +998,7 @@ function runDashboard() {
                 valText = formatGBP(valText);
             } else if (key === 'vehicleCostPerDay' || key === 'ongoingAdminCost' || key === 's1Cost' || key === 's2Cost' || key === 's3Cost') {
                 valText = '£' + parseFloat(valText).toLocaleString('en-GB');
-            } else if (key === 'vehicleCapacity') {
+            } else if (key === 'vehicleCapacity' || key === 'numberOfZones' || key === 'minibusThreshold') {
                 valText = parseInt(valText).toString();
             }
             
@@ -970,6 +1025,9 @@ function runDashboard() {
         inputs.s3Cost.value = defaults.s3Cost;
         inputs.ongoingAdminCost.value = defaults.ongoingAdminCost;
         inputs.councilSavingsClaim.value = defaults.councilSavingsClaim;
+        inputs.numberOfZones.value = defaults.numberOfZones;
+        inputs.isolationRate.value = defaults.isolationRate * 100;
+        inputs.minibusThreshold.value = defaults.minibusThreshold;
 
         // Reset numeric value texts
         Object.keys(inputs).forEach(key => {
@@ -979,7 +1037,7 @@ function runDashboard() {
                 valText = formatGBP(valText);
             } else if (key === 'vehicleCostPerDay' || key === 'ongoingAdminCost' || key === 's1Cost' || key === 's2Cost' || key === 's3Cost') {
                 valText = '£' + parseFloat(valText).toLocaleString('en-GB');
-            } else if (key === 'vehicleCapacity') {
+            } else if (key === 'vehicleCapacity' || key === 'numberOfZones' || key === 'minibusThreshold') {
                 valText = parseInt(valText).toString();
             }
             values[key].textContent = `${valText}${unit}`;
@@ -1030,7 +1088,7 @@ function runDashboard() {
             valText = formatGBP(valText);
         } else if (key === 'vehicleCostPerDay' || key === 'ongoingAdminCost' || key === 's1Cost' || key === 's2Cost' || key === 's3Cost') {
             valText = '£' + parseFloat(valText).toLocaleString('en-GB');
-        } else if (key === 'vehicleCapacity') {
+        } else if (key === 'vehicleCapacity' || key === 'numberOfZones' || key === 'minibusThreshold') {
             valText = parseInt(valText).toString();
         }
         values[key].textContent = `${valText}${unit}`;
@@ -1065,6 +1123,21 @@ function runDashboard() {
         });
     }
 
+    // Geographic Realities Modal Controls
+    const modalGeog = document.getElementById('modal-geography');
+    const btnGeog = document.getElementById('btn-geography');
+    const closeBtnGeog = document.getElementById('modal-geography-close-btn');
+
+    if (btnGeog && modalGeog && closeBtnGeog) {
+        btnGeog.addEventListener('click', () => {
+            modalGeog.style.display = 'flex';
+        });
+
+        closeBtnGeog.addEventListener('click', () => {
+            modalGeog.style.display = 'none';
+        });
+    }
+
     // Close when clicking outside of either modal content box
     window.addEventListener('click', (e) => {
         if (e.target === modal) {
@@ -1072,6 +1145,9 @@ function runDashboard() {
         }
         if (e.target === modalY1) {
             modalY1.style.display = 'none';
+        }
+        if (e.target === modalGeog) {
+            modalGeog.style.display = 'none';
         }
     });
 

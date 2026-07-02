@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STAG School Transport Financial Model Dashboard</title>
     <meta name="description" content="An interactive, data-driven financial model auditing the claims of North Yorkshire Council's school transport policy shift from catchment to nearest school only.">
-    <link rel="stylesheet" href="style.css?v=1.0.4">
+    <link rel="stylesheet" href="style.css?v=1.0.5">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -41,6 +41,7 @@
         </div>
         <div class="header-meta" style="display: flex; gap: 10px;">
             <button class="cohort-tag" id="btn-how-it-works" style="cursor: pointer; border: none; outline: none;">How this model works</button>
+            <button class="cohort-tag" id="btn-geography" style="cursor: pointer; border: none; outline: none; background-color: var(--protest-blue); color: #000000;">Geographic Realities</button>
             <button class="cohort-tag" id="btn-year1-glance" style="cursor: pointer; border: none; outline: none; background-color: var(--protest-yellow); color: #000000;">Year 1 At a Glance</button>
         </div>
     </header>
@@ -127,6 +128,44 @@
                         <span>Alternative Vehicles Required:</span>
                         <span class="derived-stat-val" id="val-vehicles-required">34</span>
                     </div>
+                </div>
+            </div>
+
+            <!-- Group: Geographic Realities -->
+            <div class="control-group">
+                <div class="control-group-title">Geographic Realities</div>
+                
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" id="label-num-zones">
+                            Feeder Zones / Clusters
+                            <span class="tooltip-icon" data-tooltip="The number of distinct rural primary school feeder clusters. Splits the population across micro-geographies.">?</span>
+                        </span>
+                        <span class="slider-value" id="val-num-zones">50</span>
+                    </div>
+                    <input type="range" id="input-num-zones" min="10" max="100" step="5" value="50" aria-labelledby="label-num-zones">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" id="label-isolation-rate">
+                            Isolation Rate
+                            <span class="tooltip-icon" data-tooltip="The percentage of children in remote areas who must use individual Taxis due to rural isolation.">?</span>
+                        </span>
+                        <span class="slider-value" id="val-isolation-rate">25%</span>
+                    </div>
+                    <input type="range" id="input-isolation-rate" min="0" max="100" step="5" value="25" data-unit="%" aria-labelledby="label-isolation-rate">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" id="label-minibus-threshold">
+                            Minibus Threshold
+                            <span class="tooltip-icon" data-tooltip="The minimum number of active non-isolated pupils in a zone required to upgrade their transport to a minibus.">?</span>
+                        </span>
+                        <span class="slider-value" id="val-minibus-threshold">8</span>
+                    </div>
+                    <input type="range" id="input-minibus-threshold" min="2" max="20" step="1" value="8" aria-labelledby="label-minibus-threshold">
                 </div>
             </div>
 
@@ -477,6 +516,24 @@
         </div>
     </div>
 
-    <script src="main.js?v=1.0.4"></script>
+    <!-- Modal: Geographic Realities -->
+    <div id="modal-geography" class="modal-overlay">
+        <div class="modal-content" style="max-width: 700px;">
+            <span class="modal-close" id="modal-geography-close-btn">&times;</span>
+            <h2 class="modal-title">Geographic Realities: Volume-Based Vehicle Scaling</h2>
+            <div class="modal-body">
+                <h3>Why 50 Zones?</h3>
+                <p>This number directly maps to the 50+ distinct rural primary school feeder clusters across North Yorkshire. The council's "nearest school" shift impacts specific village lines and primary communities, not entire towns evenly. Dividing the baseline across 50 feeder clusters yields roughly 6.8 children per community per year, ensuring the model assumes children are scattered across 50 separate micro-geographies rather than allowing impossible county-wide routing efficiencies.</p>
+                
+                <h3>The Isolation Rate</h3>
+                <p>Recognises that a portion of deeply rural pupils live down isolated lanes or single-track roads. They can never be grouped into a larger route without causing unacceptable transit times, leaving them permanently reliant on individual taxi contracts (capacity of 3).</p>
+                
+                <h3>The Minibus Threshold</h3>
+                <p>Models how costs behave in the real world. In Years 1–2, low student density forces high reliance on individual taxis. Only when the 5-year cohort stack builds up over time do village clusters reach a critical mass (the threshold) that allows the council to upgrade to a consolidated minibus (capacity of 16, costing 1.5x of a standard taxi contract).</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js?v=1.0.5"></script>
 </body>
 </html>
