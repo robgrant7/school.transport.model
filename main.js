@@ -22,7 +22,7 @@ function runDashboard() {
         s1Cost: 150,
         s2Cost: 750,
         s3Cost: 1400,
-        ongoingAdminCost: 20000,
+        ongoingAdminCost: 30000,
         councilSavingsClaim: 4263445, // Annual savings at Year 8 maturity
         numberOfZones: 50,
         isolationRate: 0.25
