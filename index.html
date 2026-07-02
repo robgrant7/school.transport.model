@@ -53,235 +53,302 @@
             
             <!-- Group: Population -->
             <div class="control-group">
-                <div class="control-group-title">Population & Cohorts</div>
-                
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" id="label-children-affected">
-                            Children Affected
-                            <span class="tooltip-icon" data-tooltip="The estimated number of new pupils each year who live in areas where the council wants to stop providing free transport.">?</span>
-                        </span>
-                        <span class="slider-value" id="val-children-affected">340</span>
+                <div class="control-group-header">Population & Cohorts</div>
+                <div class="control-group-content">
+                    <div class="slider-container">
+                        <div class="slider-header">
+                            <span class="slider-label" id="label-children-affected">
+                                Children Affected
+                                <span class="tooltip-icon" data-tooltip="The estimated number of new pupils each year who live in areas where the council wants to stop providing free transport.">?</span>
+                            </span>
+                            <span class="slider-value" id="val-children-affected">340</span>
+                        </div>
+                        <input type="range" id="input-children-affected" min="50" max="1000" step="10" value="340" aria-labelledby="label-children-affected">
                     </div>
-                    <input type="range" id="input-children-affected" min="50" max="1000" step="10" value="340" aria-labelledby="label-children-affected">
-                </div>
 
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" id="label-opt-out-rate">
-                            Opt-Out Rate
-                            <span class="tooltip-icon" data-tooltip="The percentage of affected families who choose to make their own travel arrangements instead of using council-provided transport.">?</span>
-                        </span>
-                        <span class="slider-value" id="val-opt-out-rate">70%</span>
+                    <div class="slider-container">
+                        <div class="slider-header">
+                            <span class="slider-label" id="label-opt-out-rate">
+                                Opt-Out Rate
+                                <span class="tooltip-icon" data-tooltip="The percentage of affected families who choose to make their own travel arrangements instead of using council-provided transport.">?</span>
+                            </span>
+                            <span class="slider-value" id="val-opt-out-rate">70%</span>
+                        </div>
+                        <input type="range" id="input-opt-out-rate" min="0" max="100" step="5" value="70" data-unit="%" aria-labelledby="label-opt-out-rate">
                     </div>
-                    <input type="range" id="input-opt-out-rate" min="0" max="100" step="5" value="70" data-unit="%" aria-labelledby="label-opt-out-rate">
-                </div>
 
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" id="label-erosion-rate">
-                            Erosion Rate (Attrition)
-                            <span class="tooltip-icon" data-tooltip="The percentage by which the student cohorts shrink each year due to families moving, changing schools, or growing older.">?</span>
-                        </span>
-                        <span class="slider-value" id="val-erosion-rate">10%</span>
+                    <div class="slider-container">
+                        <div class="slider-header">
+                            <span class="slider-label" id="label-erosion-rate">
+                                Erosion Rate (Attrition)
+                                <span class="tooltip-icon" data-tooltip="The percentage by which the student cohorts shrink each year due to families moving, changing schools, or growing older.">?</span>
+                            </span>
+                            <span class="slider-value" id="val-erosion-rate">10%</span>
+                        </div>
+                        <input type="range" id="input-erosion-rate" min="0" max="30" step="1" value="10" data-unit="%" aria-labelledby="label-erosion-rate">
                     </div>
-                    <input type="range" id="input-erosion-rate" min="0" max="30" step="1" value="10" data-unit="%" aria-labelledby="label-erosion-rate">
-                </div>
 
-                <!-- Derived Read-only population values -->
-                <div class="derived-stats-box">
-                    <div class="derived-stat-row">
-                        <span>Actual Affected Children:</span>
-                        <span class="derived-stat-val" id="val-actual-affected">102</span>
+                    <!-- Derived Read-only population values -->
+                    <div class="derived-stats-box">
+                        <div class="derived-stat-row">
+                            <span>Actual Affected Children:</span>
+                            <span class="derived-stat-val" id="val-actual-affected">102</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Group: Alternative Vehicle Parameters -->
             <div class="control-group">
-                <div class="control-group-title">Alternative Vehicles</div>
-                
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" id="label-vehicle-cost">
-                            Alternative Vehicle Cost / Day
-                            <span class="tooltip-icon" data-tooltip="The daily contract charge of a single alternative vehicle (e.g., taxi, minibus) hired to transport children in place of the bus.">?</span>
-                        </span>
-                        <span class="slider-value" id="val-vehicle-cost">£125</span>
-                    </div>
-                    <input type="range" id="input-vehicle-cost" min="50" max="300" step="5" value="125" data-unit="" aria-labelledby="label-vehicle-cost">
-                </div>
+                <div class="control-group-header">Alternative Vehicles</div>
+                <div class="control-group-content">
+                    
+                    <!-- Taxi Tier -->
+                    <div style="border-bottom: 1px dashed rgba(255,255,255,0.08); padding-bottom: 10px; margin-bottom: 10px;">
+                        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--protest-yellow); font-weight: bold; margin-bottom: 8px;">Taxi Tier</div>
+                        
+                        <div class="slider-container">
+                            <div class="slider-header">
+                                <span class="slider-label" id="label-vehicle-cost">
+                                    Taxi Cost / Day
+                                    <span class="tooltip-icon" data-tooltip="The daily contract charge of a single standard taxi hired to transport isolated or non-consolidated pupils.">?</span>
+                                </span>
+                                <span class="slider-value" id="val-vehicle-cost">£125</span>
+                            </div>
+                            <input type="range" id="input-vehicle-cost" min="50" max="600" step="5" value="125" aria-labelledby="label-vehicle-cost">
+                        </div>
 
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" id="label-vehicle-capacity">
-                            Pupils per Alt Vehicle
-                            <span class="tooltip-icon" data-tooltip="The average capacity of the alternative vehicle contract. Used to calculate how many alternative vehicles are required.">?</span>
-                        </span>
-                        <span class="slider-value" id="val-vehicle-capacity">3</span>
+                        <div class="slider-container" style="margin-bottom: 0;">
+                            <div class="slider-header">
+                                <span class="slider-label" id="label-vehicle-capacity">
+                                    Pupils per Taxi
+                                    <span class="tooltip-icon" data-tooltip="The average passenger capacity of a taxi vehicle contract.">?</span>
+                                </span>
+                                <span class="slider-value" id="val-vehicle-capacity">3</span>
+                            </div>
+                            <input type="range" id="input-vehicle-capacity" min="1" max="70" step="1" value="3" aria-labelledby="label-vehicle-capacity">
+                        </div>
                     </div>
-                    <input type="range" id="input-vehicle-capacity" min="1" max="16" step="1" value="3" data-unit="" aria-labelledby="label-vehicle-capacity">
-                </div>
 
-                <div class="derived-stats-box">
-                    <div class="derived-stat-row">
-                        <span>Alternative Vehicles Required:</span>
-                        <span class="derived-stat-val" id="val-vehicles-required">34</span>
+                    <!-- Minibus Tier -->
+                    <div style="border-bottom: 1px dashed rgba(255,255,255,0.08); padding-bottom: 10px; margin-bottom: 10px;">
+                        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--protest-yellow); font-weight: bold; margin-bottom: 8px;">Minibus Tier</div>
+                        
+                        <div class="slider-container">
+                            <div class="slider-header">
+                                <span class="slider-label" id="label-minibus-cost">
+                                    Minibus Cost / Day
+                                    <span class="tooltip-icon" data-tooltip="The daily contract charge of a minibus hired for consolidated groups.">?</span>
+                                </span>
+                                <span class="slider-value" id="val-minibus-cost">£175</span>
+                            </div>
+                            <input type="range" id="input-minibus-cost" min="50" max="600" step="5" value="175" aria-labelledby="label-minibus-cost">
+                        </div>
+
+                        <div class="slider-container">
+                            <div class="slider-header">
+                                <span class="slider-label" id="label-minibus-capacity">
+                                    Pupils per Minibus
+                                    <span class="tooltip-icon" data-tooltip="The passenger capacity of a minibus contract.">?</span>
+                                </span>
+                                <span class="slider-value" id="val-minibus-capacity">16</span>
+                            </div>
+                            <input type="range" id="input-minibus-capacity" min="1" max="70" step="1" value="16" aria-labelledby="label-minibus-capacity">
+                        </div>
+
+                        <div class="slider-container" style="margin-bottom: 0;">
+                            <div class="slider-header">
+                                <span class="slider-label" id="label-minibus-threshold">
+                                    Minibus Threshold
+                                    <span class="tooltip-icon" data-tooltip="The active student volume within a single zone required to transition from a taxi to a minibus.">?</span>
+                                </span>
+                                <span class="slider-value" id="val-minibus-threshold">8</span>
+                            </div>
+                            <input type="range" id="input-minibus-threshold" min="1" max="30" step="1" value="8" aria-labelledby="label-minibus-threshold">
+                        </div>
+                    </div>
+
+                    <!-- Coach Tier -->
+                    <div>
+                        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--protest-yellow); font-weight: bold; margin-bottom: 8px;">Coach Tier</div>
+                        
+                        <div class="slider-container">
+                            <div class="slider-header">
+                                <span class="slider-label" id="label-coach-cost">
+                                    Coach Cost / Day
+                                    <span class="tooltip-icon" data-tooltip="The daily contract charge of a full-sized commercial coach.">?</span>
+                                </span>
+                                <span class="slider-value" id="val-coach-cost">£300</span>
+                            </div>
+                            <input type="range" id="input-coach-cost" min="50" max="600" step="5" value="300" aria-labelledby="label-coach-cost">
+                        </div>
+
+                        <div class="slider-container">
+                            <div class="slider-header">
+                                <span class="slider-label" id="label-coach-capacity">
+                                    Pupils per Coach
+                                    <span class="tooltip-icon" data-tooltip="The passenger capacity of a full-sized coach contract.">?</span>
+                                </span>
+                                <span class="slider-value" id="val-coach-capacity">50</span>
+                            </div>
+                            <input type="range" id="input-coach-capacity" min="1" max="70" step="1" value="50" aria-labelledby="label-coach-capacity">
+                        </div>
+
+                        <div class="slider-container" style="margin-bottom: 0;">
+                            <div class="slider-header">
+                                <span class="slider-label" id="label-coach-threshold">
+                                    Coach Threshold
+                                    <span class="tooltip-icon" data-tooltip="The active student volume within a single zone required to transition from a minibus to a coach.">?</span>
+                                </span>
+                                <span class="slider-value" id="val-coach-threshold">17</span>
+                            </div>
+                            <input type="range" id="input-coach-threshold" min="1" max="30" step="1" value="17" aria-labelledby="label-coach-threshold">
+                        </div>
+                    </div>
+
+                    <!-- Derived Read-only value -->
+                    <div class="derived-stats-box" style="margin-top: 15px;">
+                        <div class="derived-stat-row">
+                            <span>Alternative Vehicles Required:</span>
+                            <span class="derived-stat-val" id="val-vehicles-required">34</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Group: Geographic Realities -->
             <div class="control-group">
-                <div class="control-group-title">Geographic Realities</div>
-                
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" id="label-num-zones">
-                            Feeder Zones / Clusters
-                            <span class="tooltip-icon" data-tooltip="The number of distinct rural primary school feeder clusters. Splits the population across micro-geographies.">?</span>
-                        </span>
-                        <span class="slider-value" id="val-num-zones">50</span>
+                <div class="control-group-header">Geographic Realities</div>
+                <div class="control-group-content">
+                    <div class="slider-container">
+                        <div class="slider-header">
+                            <span class="slider-label" id="label-num-zones">
+                                Feeder Zones / Clusters
+                                <span class="tooltip-icon" data-tooltip="The number of distinct rural primary school feeder clusters. Splits the population across micro-geographies.">?</span>
+                            </span>
+                            <span class="slider-value" id="val-num-zones">50</span>
+                        </div>
+                        <input type="range" id="input-num-zones" min="10" max="100" step="5" value="50" aria-labelledby="label-num-zones">
                     </div>
-                    <input type="range" id="input-num-zones" min="10" max="100" step="5" value="50" aria-labelledby="label-num-zones">
-                </div>
 
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" id="label-isolation-rate">
-                            Isolation Rate
-                            <span class="tooltip-icon" data-tooltip="The percentage of children in remote areas who must use individual Taxis due to rural isolation.">?</span>
-                        </span>
-                        <span class="slider-value" id="val-isolation-rate">25%</span>
+                    <div class="slider-container" style="margin-bottom: 0;">
+                        <div class="slider-header">
+                            <span class="slider-label" id="label-isolation-rate">
+                                Isolation Rate
+                                <span class="tooltip-icon" data-tooltip="The percentage of children in remote areas who must use individual Taxis due to rural isolation.">?</span>
+                            </span>
+                            <span class="slider-value" id="val-isolation-rate">25%</span>
+                        </div>
+                        <input type="range" id="input-isolation-rate" min="0" max="100" step="5" value="25" data-unit="%" aria-labelledby="label-isolation-rate">
                     </div>
-                    <input type="range" id="input-isolation-rate" min="0" max="100" step="5" value="25" data-unit="%" aria-labelledby="label-isolation-rate">
-                </div>
-
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" id="label-minibus-threshold">
-                            Minibus Threshold
-                            <span class="tooltip-icon" data-tooltip="The minimum number of active non-isolated pupils in a zone required to upgrade their transport to a minibus.">?</span>
-                        </span>
-                        <span class="slider-value" id="val-minibus-threshold">8</span>
-                    </div>
-                    <input type="range" id="input-minibus-threshold" min="2" max="20" step="1" value="8" aria-labelledby="label-minibus-threshold">
-                </div>
-
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" id="label-coach-threshold">
-                            Coach Threshold
-                            <span class="tooltip-icon" data-tooltip="The minimum number of active non-isolated pupils in a zone required to transition the consolidated group from a minibus to a coach.">?</span>
-                        </span>
-                        <span class="slider-value" id="val-coach-threshold">17</span>
-                    </div>
-                    <input type="range" id="input-coach-threshold" min="10" max="50" step="1" value="17" aria-labelledby="label-coach-threshold">
                 </div>
             </div>
 
             <!-- Group: Appeals Parameters -->
             <div class="control-group">
-                <div class="control-group-title">Appeals Progression & Costs</div>
-                
-                <!-- Rates -->
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" id="label-appeals-rate-s1">
-                            S1 Appeal Rate (of actual)
-                            <span class="tooltip-icon" data-tooltip="The proportion of actual affected families who challenge the council's decision by lodging a Stage 1 internal appeal.">?</span>
-                        </span>
-                        <span class="slider-value" id="val-appeals-rate-s1">45%</span>
+                <div class="control-group-header">Appeals Progression & Costs</div>
+                <div class="control-group-content">
+                    <!-- Rates -->
+                    <div class="slider-container">
+                        <div class="slider-header">
+                            <span class="slider-label" id="label-appeals-rate-s1">
+                                S1 Appeal Rate (of actual)
+                                <span class="tooltip-icon" data-tooltip="The proportion of actual affected families who challenge the council's decision by lodging a Stage 1 internal appeal.">?</span>
+                            </span>
+                            <span class="slider-value" id="val-appeals-rate-s1">45%</span>
+                        </div>
+                        <input type="range" id="input-appeals-rate-s1" min="0" max="100" step="5" value="45" data-unit="%" aria-labelledby="label-appeals-rate-s1">
                     </div>
-                    <input type="range" id="input-appeals-rate-s1" min="0" max="100" step="5" value="45" data-unit="%" aria-labelledby="label-appeals-rate-s1">
-                </div>
 
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" id="label-appeals-rate-s2">
-                            S2 Escalation Rate (of S1)
-                            <span class="tooltip-icon" data-tooltip="The proportion of families whose Stage 1 appeals were rejected who escalate their case to a Stage 2 Independent Panel hearing.">?</span>
-                        </span>
-                        <span class="slider-value" id="val-appeals-rate-s2">50%</span>
+                    <div class="slider-container">
+                        <div class="slider-header">
+                            <span class="slider-label" id="label-appeals-rate-s2">
+                                S2 Escalation Rate (of S1)
+                                <span class="tooltip-icon" data-tooltip="The proportion of families whose Stage 1 appeals were rejected who escalate their case to a Stage 2 Independent Panel hearing.">?</span>
+                            </span>
+                            <span class="slider-value" id="val-appeals-rate-s2">50%</span>
+                        </div>
+                        <input type="range" id="input-appeals-rate-s2" min="0" max="100" step="5" value="50" data-unit="%" aria-labelledby="label-appeals-rate-s2">
                     </div>
-                    <input type="range" id="input-appeals-rate-s2" min="0" max="100" step="5" value="50" data-unit="%" aria-labelledby="label-appeals-rate-s2">
-                </div>
 
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" id="label-appeals-rate-s3">
-                            S3 Ombudsman Rate (of S2)
-                            <span class="tooltip-icon" data-tooltip="The proportion of families whose Stage 2 appeals were rejected who take their case to the Local Government Ombudsman.">?</span>
-                        </span>
-                        <span class="slider-value" id="val-appeals-rate-s3">20%</span>
+                    <div class="slider-container">
+                        <div class="slider-header">
+                            <span class="slider-label" id="label-appeals-rate-s3">
+                                S3 Ombudsman Rate (of S2)
+                                <span class="tooltip-icon" data-tooltip="The proportion of families whose Stage 2 appeals were rejected who take their case to the Local Government Ombudsman.">?</span>
+                            </span>
+                            <span class="slider-value" id="val-appeals-rate-s3">20%</span>
+                        </div>
+                        <input type="range" id="input-appeals-rate-s3" min="0" max="100" step="5" value="20" data-unit="%" aria-labelledby="label-appeals-rate-s3">
                     </div>
-                    <input type="range" id="input-appeals-rate-s3" min="0" max="100" step="5" value="20" data-unit="%" aria-labelledby="label-appeals-rate-s3">
-                </div>
 
-                <!-- Unit Costs -->
-                <div class="slider-container" style="border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 12px; margin-top: 12px;">
-                    <div class="slider-header">
-                        <span class="slider-label" id="label-appeals-cost-s1">
-                            S1 Appeal Unit Cost
-                            <span class="tooltip-icon" data-tooltip="The average staff and admin cost to the council to process and review a single Stage 1 appeal.">?</span>
-                        </span>
-                        <span class="slider-value" id="val-appeals-cost-s1">£150</span>
+                    <!-- Unit Costs -->
+                    <div class="slider-container" style="border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 12px; margin-top: 12px;">
+                        <div class="slider-header">
+                            <span class="slider-label" id="label-appeals-cost-s1">
+                                S1 Appeal Unit Cost
+                                <span class="tooltip-icon" data-tooltip="The average staff and admin cost to the council to process and review a single Stage 1 appeal.">?</span>
+                            </span>
+                            <span class="slider-value" id="val-appeals-cost-s1">£150</span>
+                        </div>
+                        <input type="range" id="input-appeals-cost-s1" min="0" max="1000" step="50" value="150" aria-labelledby="label-appeals-cost-s1">
                     </div>
-                    <input type="range" id="input-appeals-cost-s1" min="0" max="1000" step="50" value="150" aria-labelledby="label-appeals-cost-s1">
-                </div>
 
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" id="label-appeals-cost-s2">
-                            S2 Appeal Unit Cost
-                            <span class="tooltip-icon" data-tooltip="The average cost to hold an independent appeal panel hearing, including panels member fees, clerk prep, and travel.">?</span>
-                        </span>
-                        <span class="slider-value" id="val-appeals-cost-s2">£750</span>
+                    <div class="slider-container">
+                        <div class="slider-header">
+                            <span class="slider-label" id="label-appeals-cost-s2">
+                                S2 Appeal Unit Cost
+                                <span class="tooltip-icon" data-tooltip="The average cost to hold an independent appeal panel hearing, including panels member fees, clerk prep, and travel.">?</span>
+                            </span>
+                            <span class="slider-value" id="val-appeals-cost-s2">£750</span>
+                        </div>
+                        <input type="range" id="input-appeals-cost-s2" min="0" max="3000" step="100" value="750" aria-labelledby="label-appeals-cost-s2">
                     </div>
-                    <input type="range" id="input-appeals-cost-s2" min="0" max="3000" step="100" value="750" aria-labelledby="label-appeals-cost-s2">
-                </div>
 
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" id="label-appeals-cost-s3">
-                            S3 Ombudsman Unit Cost
-                            <span class="tooltip-icon" data-tooltip="The average staff and legal cost to investigate and respond to a complaint escalated to the Ombudsman.">?</span>
-                        </span>
-                        <span class="slider-value" id="val-appeals-cost-s3">£1,400</span>
+                    <div class="slider-container" style="margin-bottom: 0;">
+                        <div class="slider-header">
+                            <span class="slider-label" id="label-appeals-cost-s3">
+                                S3 Ombudsman Unit Cost
+                                <span class="tooltip-icon" data-tooltip="The average staff and legal cost to investigate and respond to a complaint escalated to the Ombudsman.">?</span>
+                            </span>
+                            <span class="slider-value" id="val-appeals-cost-s3">£1,400</span>
+                        </div>
+                        <input type="range" id="input-appeals-cost-s3" min="0" max="5000" step="100" value="1400" aria-labelledby="label-appeals-cost-s3">
                     </div>
-                    <input type="range" id="input-appeals-cost-s3" min="0" max="5000" step="100" value="1400" aria-labelledby="label-appeals-cost-s3">
                 </div>
             </div>
 
             <!-- Group: Admin Costs -->
             <div class="control-group">
-                <div class="control-group-title">General Administration</div>
-                
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" id="label-admin-cost">
-                            Ongoing Admin Cost / Yr
-                            <span class="tooltip-icon" data-tooltip="The yearly general administrative cost to run the transport scheme (software licenses, mapping reviews, database updates).">?</span>
-                        </span>
-                        <span class="slider-value" id="val-admin-cost">£20,000</span>
+                <div class="control-group-header">General Administration</div>
+                <div class="control-group-content">
+                    <div class="slider-container" style="margin-bottom: 0;">
+                        <div class="slider-header">
+                            <span class="slider-label" id="label-admin-cost">
+                                Ongoing Admin Cost / Yr
+                                <span class="tooltip-icon" data-tooltip="The yearly general administrative cost to run the transport scheme (software licenses, mapping reviews, database updates).">?</span>
+                            </span>
+                            <span class="slider-value" id="val-admin-cost">£20,000</span>
+                        </div>
+                        <input type="range" id="input-admin-cost" min="0" max="100000" step="5000" value="20000" data-unit="" aria-labelledby="label-admin-cost">
                     </div>
-                    <input type="range" id="input-admin-cost" min="0" max="100000" step="5000" value="20000" data-unit="" aria-labelledby="label-admin-cost">
                 </div>
             </div>
 
             <!-- Group: Council Savings Claim -->
             <div class="control-group">
-                <div class="control-group-title">Council Claims</div>
-                
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" id="label-council-savings">
-                            Claimed Annual Savings (Yr 8 Maturity)
-                            <span class="tooltip-icon" data-tooltip="The claimed annual savings generated by the policy once the transition is fully complete in Year 8.">?</span>
-                        </span>
-                        <span class="slider-value" id="val-council-savings">£4,263,445</span>
+                <div class="control-group-header">Council Claims</div>
+                <div class="control-group-content">
+                    <div class="slider-container" style="margin-bottom: 0;">
+                        <div class="slider-header">
+                            <span class="slider-label" id="label-council-savings">
+                                Claimed Annual Savings (Yr 8 Maturity)
+                                <span class="tooltip-icon" data-tooltip="The claimed annual savings generated by the policy once the transition is fully complete in Year 8.">?</span>
+                            </span>
+                            <span class="slider-value" id="val-council-savings">£4,263,445</span>
+                        </div>
+                        <input type="range" id="input-council-savings" min="500000" max="10000000" step="5000" value="4263445" aria-labelledby="label-council-savings">
                     </div>
-                    <input type="range" id="input-council-savings" min="500000" max="10000000" step="5000" value="4263445" aria-labelledby="label-council-savings">
                 </div>
             </div>
 
@@ -532,18 +599,8 @@
         <div class="modal-content" style="max-width: 700px;">
             <span class="modal-close" id="modal-geography-close-btn">&times;</span>
             <h2 class="modal-title">Geographic Realities: Volume-Based Vehicle Scaling</h2>
-            <div class="modal-body">
-                <h3>Why 50 Zones?</h3>
-                <p>This number directly maps to the 50+ distinct rural primary school feeder clusters across North Yorkshire. The council's "nearest school" shift impacts specific village lines and primary communities, not entire towns evenly. Dividing the baseline across 50 feeder clusters yields roughly 6.8 children per community per year, ensuring the model assumes children are scattered across 50 separate micro-geographies rather than allowing impossible county-wide routing efficiencies.</p>
-                
-                <h3>The Isolation Rate</h3>
-                <p>Recognises that a portion of deeply rural pupils live down isolated lanes or single-track roads. They can never be grouped into a larger route without causing unacceptable transit times, leaving them permanently reliant on individual taxi contracts (capacity of 3).</p>
-                
-                <h3>The Minibus Threshold</h3>
-                <p>Models how costs behave in the real world. In Years 1–2, low student density forces high reliance on individual taxis. Only when the 5-year cohort stack builds up over time do village clusters reach a critical mass (the threshold) that allows the council to upgrade to a consolidated minibus (capacity of 16, costing 1.5x of a standard taxi contract).</p>
-                
-                <h3>The Coach Threshold</h3>
-                <p>Models the long-term saturation of the policy. In Years 5–8, as the rolling 5-year cohort stack completely fills up, certain high-density primary feeder zones will hit critical mass (17+ active pupils). At this point, the model dynamically rewards the council by consolidating the minibus route back into a full-capacity coach contract, accurately reflecting the long-term stabilization of a fully embedded transport network.</p>
+            <div class="modal-body" id="modal-geography-body">
+                <!-- Dynamic text populated from main.js -->
             </div>
         </div>
     </div>

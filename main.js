@@ -7,8 +7,14 @@ function runDashboard() {
         optOutRate: 0.70,     // 70%
         erosionRate: 0.10,    // 10%
         observationWindow: 8, // 8 years
-        vehicleCostPerDay: 125,
-        pupilsPerAltVehicle: 3,
+        vehicleCostPerDay: 125, // Taxi Cost / Day
+        pupilsPerAltVehicle: 3, // Pupils per Taxi
+        minibusCostPerDay: 175,
+        pupilsPerMinibus: 16,
+        minibusThreshold: 8,
+        coachCostPerDay: 300,
+        pupilsPerCoach: 50,
+        coachThreshold: 17,
         schoolDays: 190,
         schoolCareer: 5,
         s1AppealsRate: 0.45,  // 45% of actual affected children
@@ -20,9 +26,7 @@ function runDashboard() {
         ongoingAdminCost: 20000,
         councilSavingsClaim: 4263445, // Annual savings at Year 8 maturity
         numberOfZones: 50,
-        isolationRate: 0.25,
-        minibusThreshold: 8,
-        coachThreshold: 17
+        isolationRate: 0.25
     };
 
     // -------------------------------------------------------------
@@ -34,6 +38,12 @@ function runDashboard() {
         erosionRate: document.getElementById('input-erosion-rate'),
         vehicleCostPerDay: document.getElementById('input-vehicle-cost'),
         vehicleCapacity: document.getElementById('input-vehicle-capacity'),
+        minibusCostPerDay: document.getElementById('input-minibus-cost'),
+        pupilsPerMinibus: document.getElementById('input-minibus-capacity'),
+        minibusThreshold: document.getElementById('input-minibus-threshold'),
+        coachCostPerDay: document.getElementById('input-coach-cost'),
+        pupilsPerCoach: document.getElementById('input-coach-capacity'),
+        coachThreshold: document.getElementById('input-coach-threshold'),
         s1AppealsRate: document.getElementById('input-appeals-rate-s1'),
         s2AppealsRate: document.getElementById('input-appeals-rate-s2'),
         s3OmbudRate: document.getElementById('input-appeals-rate-s3'),
@@ -43,9 +53,7 @@ function runDashboard() {
         ongoingAdminCost: document.getElementById('input-admin-cost'),
         councilSavingsClaim: document.getElementById('input-council-savings'),
         numberOfZones: document.getElementById('input-num-zones'),
-        isolationRate: document.getElementById('input-isolation-rate'),
-        minibusThreshold: document.getElementById('input-minibus-threshold'),
-        coachThreshold: document.getElementById('input-coach-threshold')
+        isolationRate: document.getElementById('input-isolation-rate')
     };
 
     const values = {
@@ -54,6 +62,12 @@ function runDashboard() {
         erosionRate: document.getElementById('val-erosion-rate'),
         vehicleCostPerDay: document.getElementById('val-vehicle-cost'),
         vehicleCapacity: document.getElementById('val-vehicle-capacity'),
+        minibusCostPerDay: document.getElementById('val-minibus-cost'),
+        pupilsPerMinibus: document.getElementById('val-minibus-capacity'),
+        minibusThreshold: document.getElementById('val-minibus-threshold'),
+        coachCostPerDay: document.getElementById('val-coach-cost'),
+        pupilsPerCoach: document.getElementById('val-coach-capacity'),
+        coachThreshold: document.getElementById('val-coach-threshold'),
         s1AppealsRate: document.getElementById('val-appeals-rate-s1'),
         s2AppealsRate: document.getElementById('val-appeals-rate-s2'),
         s3OmbudRate: document.getElementById('val-appeals-rate-s3'),
@@ -63,9 +77,7 @@ function runDashboard() {
         ongoingAdminCost: document.getElementById('val-admin-cost'),
         councilSavingsClaim: document.getElementById('val-council-savings'),
         numberOfZones: document.getElementById('val-num-zones'),
-        isolationRate: document.getElementById('val-isolation-rate'),
-        minibusThreshold: document.getElementById('val-minibus-threshold'),
-        coachThreshold: document.getElementById('val-coach-threshold')
+        isolationRate: document.getElementById('val-isolation-rate')
     };
 
     // Calculated read-only values in control panel
@@ -118,6 +130,12 @@ function runDashboard() {
         const erosionRate = parseFloat(inputs.erosionRate.value) / 100;
         const vehicleCostPerDay = parseFloat(inputs.vehicleCostPerDay.value);
         const pupilsPerAltVehicle = parseFloat(inputs.vehicleCapacity.value);
+        const minibusCostPerDay = parseFloat(inputs.minibusCostPerDay.value);
+        const pupilsPerMinibus = parseFloat(inputs.pupilsPerMinibus.value);
+        const minibusThreshold = parseFloat(inputs.minibusThreshold.value);
+        const coachCostPerDay = parseFloat(inputs.coachCostPerDay.value);
+        const pupilsPerCoach = parseFloat(inputs.pupilsPerCoach.value);
+        const coachThreshold = parseFloat(inputs.coachThreshold.value);
         const s1AppealsRate = parseFloat(inputs.s1AppealsRate.value) / 100;
         const s2AppealsRate = parseFloat(inputs.s2AppealsRate.value) / 100;
         const s3OmbudRate = parseFloat(inputs.s3OmbudRate.value) / 100;
@@ -125,8 +143,6 @@ function runDashboard() {
         const councilSavingsClaim = parseFloat(inputs.councilSavingsClaim.value);
         const numberOfZones = parseFloat(inputs.numberOfZones.value);
         const isolationRate = parseFloat(inputs.isolationRate.value) / 100;
-        const minibusThreshold = parseFloat(inputs.minibusThreshold.value);
-        const coachThreshold = parseFloat(inputs.coachThreshold.value);
 
         // Fixed defaults for inner operations (to preserve simplicity in sidebar)
         const schoolDays = defaults.schoolDays;
@@ -143,23 +159,23 @@ function runDashboard() {
         // Calculate Base Cohort Vehicles (Year 1) dynamically using zone partitioning
         const baseCohortPop = actualAffected / numberOfZones;
         const baseIsolated = baseCohortPop * isolationRate;
-        const baseIsolatedTaxis = baseIsolated / 3;
+        const baseIsolatedTaxis = baseIsolated / pupilsPerAltVehicle;
         const baseRemaining = baseCohortPop - baseIsolated;
         let baseGroupTaxis = 0;
         let baseGroupMinibuses = 0;
         let baseGroupCoaches = 0;
         if (baseRemaining < minibusThreshold) {
-            baseGroupTaxis = baseRemaining / 3;
+            baseGroupTaxis = baseRemaining / pupilsPerAltVehicle;
         } else if (baseRemaining < coachThreshold) {
-            baseGroupMinibuses = baseRemaining / 16;
+            baseGroupMinibuses = baseRemaining / pupilsPerMinibus;
         } else {
-            baseGroupCoaches = baseRemaining / 50;
+            baseGroupCoaches = baseRemaining / pupilsPerCoach;
         }
         const baseCohortVehicles = (baseIsolatedTaxis + baseGroupTaxis + baseGroupMinibuses + baseGroupCoaches) * numberOfZones;
         const annualVehicleCost = numberOfZones * ( 
             (baseIsolatedTaxis + baseGroupTaxis) * vehicleCostPerDay + 
-            baseGroupMinibuses * (vehicleCostPerDay * 1.5) +
-            baseGroupCoaches * (vehicleCostPerDay * 3.0)
+            baseGroupMinibuses * minibusCostPerDay +
+            baseGroupCoaches * coachCostPerDay
         ) * schoolDays;
 
         // Phased council savings weights matching the spreadsheet implementation steps
@@ -189,21 +205,21 @@ function runDashboard() {
                 zonePop += (actualAffected * Math.pow(1 - erosionRate, age - 1)) / numberOfZones;
             }
             const isolatedPupils = zonePop * isolationRate;
-            const isolatedTaxis = isolatedPupils / 3;
+            const isolatedTaxis = isolatedPupils / pupilsPerAltVehicle;
             const remPupils = zonePop - isolatedPupils;
             let groupTaxis = 0;
             let groupMinibuses = 0;
             let groupCoaches = 0;
             if (remPupils < minibusThreshold) {
-                groupTaxis = remPupils / 3;
+                groupTaxis = remPupils / pupilsPerAltVehicle;
             } else if (remPupils < coachThreshold) {
-                groupMinibuses = remPupils / 16;
+                groupMinibuses = remPupils / pupilsPerMinibus;
             } else {
-                groupCoaches = remPupils / 50;
+                groupCoaches = remPupils / pupilsPerCoach;
             }
             const layerCostPerZone = (isolatedTaxis + groupTaxis) * vehicleCostPerDay + 
-                                     groupMinibuses * (vehicleCostPerDay * 1.5) +
-                                     groupCoaches * (vehicleCostPerDay * 3.0);
+                                     groupMinibuses * minibusCostPerDay +
+                                     groupCoaches * coachCostPerDay;
             spotVehicle = layerCostPerZone * numberOfZones * schoolDays;
             cumulativeVehicle += spotVehicle;
 
@@ -434,9 +450,43 @@ function runDashboard() {
 
         // Update Year 1 At a Glance Modal HTML
         updateYear1ModalContent(model);
+        
+        // Update Geographic Realities Modal HTML
+        updateGeographyModalContent();
 
         // Update Chart.js Data
         renderChart(model.yearsData);
+    }
+
+    function updateGeographyModalContent() {
+        const numberOfZones = parseFloat(inputs.numberOfZones.value);
+        const isolationRate = parseFloat(inputs.isolationRate.value);
+        const minibusThreshold = parseFloat(inputs.minibusThreshold.value);
+        const coachThreshold = parseFloat(inputs.coachThreshold.value);
+        
+        const vehicleCostPerDay = parseFloat(inputs.vehicleCostPerDay.value);
+        const pupilsPerAltVehicle = parseFloat(inputs.vehicleCapacity.value);
+        const minibusCostPerDay = parseFloat(inputs.minibusCostPerDay.value);
+        const pupilsPerMinibus = parseFloat(inputs.pupilsPerMinibus.value);
+        const coachCostPerDay = parseFloat(inputs.coachCostPerDay.value);
+        const pupilsPerCoach = parseFloat(inputs.pupilsPerCoach.value);
+
+        const bodyElement = document.getElementById('modal-geography-body');
+        if (!bodyElement) return;
+
+        bodyElement.innerHTML = `
+            <h3>Why ${numberOfZones} Zones?</h3>
+            <p>This number directly maps to the ${numberOfZones} distinct rural primary school feeder clusters across North Yorkshire. The council's "nearest school" shift impacts specific village lines and primary communities, not entire towns evenly. Dividing the baseline across ${numberOfZones} feeder clusters yields roughly ${(inputs.childrenAffected.value * (1 - inputs.optOutRate.value/100) / numberOfZones).toFixed(1)} children per community per year, ensuring the model assumes children are scattered across ${numberOfZones} separate micro-geographies rather than allowing impossible county-wide routing efficiencies.</p>
+            
+            <h3>The Isolation Rate (${isolationRate}%)</h3>
+            <p>Recognises that ${isolationRate}% of deeply rural pupils live down isolated lanes or single-track roads. They can never be grouped into a larger route without causing unacceptable transit times, leaving them permanently reliant on individual Taxi contracts (capacity of ${pupilsPerAltVehicle} pupils, costing £${vehicleCostPerDay}/day).</p>
+            
+            <h3>The Minibus Threshold (${minibusThreshold} Pupils)</h3>
+            <p>Models how costs behave in the real world. Only when the 5-year cohort stack builds up over time do village clusters reach a critical mass of ${minibusThreshold} pupils, allowing the council to upgrade to a consolidated Minibus contract (capacity of ${pupilsPerMinibus} pupils, costing £${minibusCostPerDay}/day).</p>
+            
+            <h3>The Coach Threshold (${coachThreshold} Pupils)</h3>
+            <p>Models the long-term saturation of the policy. In Years 5–8, as the rolling 5-year cohort stack completely fills up, certain high-density primary feeder zones will hit critical mass (${coachThreshold}+ active pupils). At this point, the model dynamically rewards the council by consolidating the minibus route back into a full-capacity Coach contract (capacity of ${pupilsPerCoach} pupils, costing £${coachCostPerDay}/day), accurately reflecting the long-term stabilization of a fully embedded transport network.</p>
+        `;
     }
 
     function updateYear1ModalContent(model) {
@@ -496,21 +546,21 @@ function runDashboard() {
 
         const zoneCohortPop = actualAffected / numberOfZones;
         const isolatedPupils = zoneCohortPop * (isolationRate / 100);
-        const isolatedTaxis = isolatedPupils / 3;
+        const isolatedTaxis = isolatedPupils / pupilsPerAltVehicle;
         const remPupils = zoneCohortPop - isolatedPupils;
         let groupTaxis = 0;
         let groupMinibuses = 0;
         let groupCoaches = 0;
         let groupText = '';
         if (remPupils < minibusThreshold) {
-            groupTaxis = remPupils / 3;
-            groupText = `${groupTaxis.toFixed(2)} Taxis`;
+            groupTaxis = remPupils / pupilsPerAltVehicle;
+            groupText = `${groupTaxis.toFixed(2)} Taxis (capacity: ${pupilsPerAltVehicle}, cost: £${vehicleCostPerDay})`;
         } else if (remPupils < coachThreshold) {
-            groupMinibuses = remPupils / 16;
-            groupText = `${groupMinibuses.toFixed(2)} Minibuses (at 1.5x cost)`;
+            groupMinibuses = remPupils / pupilsPerMinibus;
+            groupText = `${groupMinibuses.toFixed(2)} Minibuses (capacity: ${pupilsPerMinibus}, cost: £${minibusCostPerDay})`;
         } else {
-            groupCoaches = remPupils / 50;
-            groupText = `${groupCoaches.toFixed(2)} Coaches (at 3.0x cost)`;
+            groupCoaches = remPupils / pupilsPerCoach;
+            groupText = `${groupCoaches.toFixed(2)} Coaches (capacity: ${pupilsPerCoach}, cost: £${coachCostPerDay})`;
         }
 
         bodyElement.innerHTML = `
@@ -541,7 +591,7 @@ function runDashboard() {
                 </li>
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
-                    <strong>Rural Isolation:</strong> ${isolationRate}% of pupils (${isolatedPupils.toFixed(2)} per zone) require <strong style="color: var(--text-primary);">${isolatedTaxis.toFixed(2)} isolated Taxis</strong> (capacity 3).
+                    <strong>Rural Isolation:</strong> ${isolationRate}% of pupils (${isolatedPupils.toFixed(2)} per zone) require <strong style="color: var(--text-primary);">${isolatedTaxis.toFixed(2)} isolated Taxis</strong> (capacity ${pupilsPerAltVehicle}, cost: £${vehicleCostPerDay}/day).
                 </li>
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
@@ -1020,9 +1070,9 @@ function runDashboard() {
             // Format displays
             if (key === 'councilSavingsClaim') {
                 valText = formatGBP(valText);
-            } else if (key === 'vehicleCostPerDay' || key === 'ongoingAdminCost' || key === 's1Cost' || key === 's2Cost' || key === 's3Cost') {
+            } else if (key === 'vehicleCostPerDay' || key === 'minibusCostPerDay' || key === 'coachCostPerDay' || key === 'ongoingAdminCost' || key === 's1Cost' || key === 's2Cost' || key === 's3Cost') {
                 valText = '£' + parseFloat(valText).toLocaleString('en-GB');
-            } else if (key === 'vehicleCapacity' || key === 'numberOfZones' || key === 'minibusThreshold' || key === 'coachThreshold') {
+            } else if (key === 'vehicleCapacity' || key === 'minibusCapacity' || key === 'coachCapacity' || key === 'numberOfZones' || key === 'minibusThreshold' || key === 'coachThreshold') {
                 valText = parseInt(valText).toString();
             }
             
@@ -1041,6 +1091,12 @@ function runDashboard() {
         inputs.erosionRate.value = defaults.erosionRate * 100;
         inputs.vehicleCostPerDay.value = defaults.vehicleCostPerDay;
         inputs.vehicleCapacity.value = defaults.pupilsPerAltVehicle;
+        inputs.minibusCostPerDay.value = defaults.minibusCostPerDay;
+        inputs.pupilsPerMinibus.value = defaults.pupilsPerMinibus;
+        inputs.minibusThreshold.value = defaults.minibusThreshold;
+        inputs.coachCostPerDay.value = defaults.coachCostPerDay;
+        inputs.pupilsPerCoach.value = defaults.pupilsPerCoach;
+        inputs.coachThreshold.value = defaults.coachThreshold;
         inputs.s1AppealsRate.value = defaults.s1AppealsRate * 100;
         inputs.s2AppealsRate.value = defaults.s2AppealsRate * 100;
         inputs.s3OmbudRate.value = defaults.s3OmbudRate * 100;
@@ -1051,8 +1107,6 @@ function runDashboard() {
         inputs.councilSavingsClaim.value = defaults.councilSavingsClaim;
         inputs.numberOfZones.value = defaults.numberOfZones;
         inputs.isolationRate.value = defaults.isolationRate * 100;
-        inputs.minibusThreshold.value = defaults.minibusThreshold;
-        inputs.coachThreshold.value = defaults.coachThreshold;
 
         // Reset numeric value texts
         Object.keys(inputs).forEach(key => {
@@ -1060,9 +1114,9 @@ function runDashboard() {
             let valText = inputs[key].value;
             if (key === 'councilSavingsClaim') {
                 valText = formatGBP(valText);
-            } else if (key === 'vehicleCostPerDay' || key === 'ongoingAdminCost' || key === 's1Cost' || key === 's2Cost' || key === 's3Cost') {
+            } else if (key === 'vehicleCostPerDay' || key === 'minibusCostPerDay' || key === 'coachCostPerDay' || key === 'ongoingAdminCost' || key === 's1Cost' || key === 's2Cost' || key === 's3Cost') {
                 valText = '£' + parseFloat(valText).toLocaleString('en-GB');
-            } else if (key === 'vehicleCapacity' || key === 'numberOfZones' || key === 'minibusThreshold' || key === 'coachThreshold') {
+            } else if (key === 'vehicleCapacity' || key === 'minibusCapacity' || key === 'coachCapacity' || key === 'numberOfZones' || key === 'minibusThreshold' || key === 'coachThreshold') {
                 valText = parseInt(valText).toString();
             }
             values[key].textContent = `${valText}${unit}`;
@@ -1111,9 +1165,9 @@ function runDashboard() {
         let valText = inputs[key].value;
         if (key === 'councilSavingsClaim') {
             valText = formatGBP(valText);
-        } else if (key === 'vehicleCostPerDay' || key === 'ongoingAdminCost' || key === 's1Cost' || key === 's2Cost' || key === 's3Cost') {
+        } else if (key === 'vehicleCostPerDay' || key === 'minibusCostPerDay' || key === 'coachCostPerDay' || key === 'ongoingAdminCost' || key === 's1Cost' || key === 's2Cost' || key === 's3Cost') {
             valText = '£' + parseFloat(valText).toLocaleString('en-GB');
-        } else if (key === 'vehicleCapacity' || key === 'numberOfZones' || key === 'minibusThreshold' || key === 'coachThreshold') {
+        } else if (key === 'vehicleCapacity' || key === 'minibusCapacity' || key === 'coachCapacity' || key === 'numberOfZones' || key === 'minibusThreshold' || key === 'coachThreshold') {
             valText = parseInt(valText).toString();
         }
         values[key].textContent = `${valText}${unit}`;
@@ -1173,6 +1227,17 @@ function runDashboard() {
         }
         if (e.target === modalGeog) {
             modalGeog.style.display = 'none';
+        }
+    });
+
+    // Initialize sidebar accordions
+    const controlGroups = document.querySelectorAll('.control-group');
+    controlGroups.forEach(group => {
+        const header = group.querySelector('.control-group-header');
+        if (header) {
+            header.addEventListener('click', () => {
+                group.classList.toggle('open');
+            });
         }
     });
 

@@ -139,16 +139,49 @@ header {
 }
 
 .control-group {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 12px;
 }
 
-.control-group-title {
+.control-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 1.5px;
     color: var(--protest-blue);
-    margin-bottom: 12px;
+    margin-bottom: 0;
     font-weight: 700;
+    cursor: pointer;
+    padding: 6px 0;
+    transition: color 0.2s ease;
+}
+
+.control-group-header:hover {
+    color: var(--text-primary);
+}
+
+.control-group-header::after {
+    content: '+';
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--text-secondary);
+    transition: transform 0.2s ease;
+}
+
+.control-group.open .control-group-header::after {
+    content: '−';
+}
+
+.control-group-content {
+    display: none;
+    padding-top: 14px;
+}
+
+.control-group.open .control-group-content {
+    display: block;
 }
 
 .slider-container {
