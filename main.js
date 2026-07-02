@@ -7,8 +7,8 @@ function runDashboard() {
         optOutRate: 0.70,     // 70%
         erosionRate: 0.10,    // 10%
         observationWindow: 7, // 7 years
-        taxiCostPerDay: 125,
-        pupilsPerTaxi: 3,
+        vehicleCostPerDay: 125,
+        pupilsPerAltVehicle: 3,
         schoolDays: 190,
         schoolCareer: 5,
         s1AppealsRate: 0.45,  // 45% of actual affected children
@@ -28,7 +28,8 @@ function runDashboard() {
         childrenAffected: document.getElementById('input-children-affected'),
         optOutRate: document.getElementById('input-opt-out-rate'),
         erosionRate: document.getElementById('input-erosion-rate'),
-        taxiCostPerDay: document.getElementById('input-taxi-cost'),
+        vehicleCostPerDay: document.getElementById('input-vehicle-cost'),
+        vehicleCapacity: document.getElementById('input-vehicle-capacity'),
         s1AppealsRate: document.getElementById('input-appeals-rate-s1'),
         s2AppealsRate: document.getElementById('input-appeals-rate-s2'),
         s3OmbudRate: document.getElementById('input-appeals-rate-s3'),
@@ -43,7 +44,8 @@ function runDashboard() {
         childrenAffected: document.getElementById('val-children-affected'),
         optOutRate: document.getElementById('val-opt-out-rate'),
         erosionRate: document.getElementById('val-erosion-rate'),
-        taxiCostPerDay: document.getElementById('val-taxi-cost'),
+        vehicleCostPerDay: document.getElementById('val-vehicle-cost'),
+        vehicleCapacity: document.getElementById('val-vehicle-capacity'),
         s1AppealsRate: document.getElementById('val-appeals-rate-s1'),
         s2AppealsRate: document.getElementById('val-appeals-rate-s2'),
         s3OmbudRate: document.getElementById('val-appeals-rate-s3'),
@@ -57,7 +59,7 @@ function runDashboard() {
     // Calculated read-only values in control panel
     const derivedDisplays = {
         actualAffected: document.getElementById('val-actual-affected'),
-        taxisRequired: document.getElementById('val-taxis-required')
+        vehiclesRequired: document.getElementById('val-vehicles-required')
     };
 
     const kpis = {
@@ -65,7 +67,7 @@ function runDashboard() {
         netSavingsLabel: document.getElementById('kpi-net-savings-label'),
         netSubtext: document.getElementById('kpi-net-subtext'),
         netStatusBadge: document.getElementById('kpi-net-status-badge'),
-        compoundedTaxiCost: document.getElementById('kpi-compounded-taxi'),
+        compoundedVehicleCost: document.getElementById('kpi-compounded-vehicle'),
         disputeCost: document.getElementById('kpi-dispute-cost'),
         adminCost: document.getElementById('kpi-admin-cost'),
         costCoverage: document.getElementById('kpi-cost-coverage'),
@@ -99,7 +101,8 @@ function runDashboard() {
         const childrenAffected = parseFloat(inputs.childrenAffected.value);
         const optOutRate = parseFloat(inputs.optOutRate.value) / 100;
         const erosionRate = parseFloat(inputs.erosionRate.value) / 100;
-        const taxiCostPerDay = parseFloat(inputs.taxiCostPerDay.value);
+        const vehicleCostPerDay = parseFloat(inputs.vehicleCostPerDay.value);
+        const pupilsPerAltVehicle = parseFloat(inputs.vehicleCapacity.value);
         const s1AppealsRate = parseFloat(inputs.s1AppealsRate.value) / 100;
         const s2AppealsRate = parseFloat(inputs.s2AppealsRate.value) / 100;
         const s3OmbudRate = parseFloat(inputs.s3OmbudRate.value) / 100;
@@ -107,7 +110,6 @@ function runDashboard() {
         const councilSavingsClaim = parseFloat(inputs.councilSavingsClaim.value);
 
         // Fixed defaults for inner operations (to preserve simplicity in sidebar)
-        const pupilsPerTaxi = defaults.pupilsPerTaxi;
         const schoolDays = defaults.schoolDays;
         const schoolCareer = defaults.schoolCareer;
         
@@ -118,28 +120,27 @@ function runDashboard() {
 
         // Derived variables
         const actualAffected = Math.round(childrenAffected * (1 - optOutRate) * 100) / 100;
-        const baseCohortTaxis = actualAffected / pupilsPerTaxi;
-        const annualTaxiCost = baseCohortTaxis * taxiCostPerDay * schoolDays;
+        const baseCohortVehicles = actualAffected / pupilsPerAltVehicle;
+        const annualVehicleCost = baseCohortVehicles * vehicleCostPerDay * schoolDays;
 
         // Peak annual savings S in Year 7: 4 * S = claim => S = claim / 4
         const peakSavingsY7 = councilSavingsClaim / 4;
 
-        let cumulativeTaxi = 0;
+        let cumulativeVehicle = 0;
         let cumulativeAppealsTotal = 0;
         let cumulativeAdmin = 0;
         let cumulativeCouncilSavings = 0;
-        let cumulativeTotal = 0;
 
         const yearsData = [];
 
         for (let t = 1; t <= 7; t++) {
-            // Taxis Spot Cost: Sum of active cohorts in system (eroded based on their career age)
-            let spotTaxi = 0;
+            // Alternative Vehicles Spot Cost: Sum of active cohorts in system (eroded based on their career age)
+            let spotVehicle = 0;
             for (let age = 1; age <= Math.min(t, schoolCareer); age++) {
-                const cohortTaxis = baseCohortTaxis * Math.pow(1 - erosionRate, age - 1);
-                spotTaxi += cohortTaxis * taxiCostPerDay * schoolDays;
+                const cohortVehicles = baseCohortVehicles * Math.pow(1 - erosionRate, age - 1);
+                spotVehicle += cohortVehicles * vehicleCostPerDay * schoolDays;
             }
-            cumulativeTaxi += spotTaxi;
+            cumulativeVehicle += spotVehicle;
 
             // Appeals Count: intake entering in Year t decays by the erosion rate
             const cohortIntake = actualAffected * Math.pow(1 - erosionRate, t - 1);
@@ -162,16 +163,16 @@ function runDashboard() {
             const spotCouncilSavings = peakSavingsY7 * (t / 7);
             cumulativeCouncilSavings += spotCouncilSavings;
 
-            const spotTotal = spotTaxi + spotAppeals + spotAdmin;
-            const cumulativeTotal = cumulativeTaxi + cumulativeAppealsTotal + cumulativeAdmin;
+            const spotTotal = spotVehicle + spotAppeals + spotAdmin;
+            const cumulativeTotal = cumulativeVehicle + cumulativeAppealsTotal + cumulativeAdmin;
 
             const spotNetSavings = spotCouncilSavings - spotTotal;
             const cumulativeNetSavings = cumulativeCouncilSavings - cumulativeTotal;
 
             yearsData.push({
                 year: t,
-                spotTaxi,
-                cumulativeTaxi,
+                spotVehicle,
+                cumulativeVehicle,
                 s1Count: Math.round(s1Count * 10) / 10,
                 s2Count: Math.round(s2Count * 10) / 10,
                 s3Count: Math.round(s3Count * 10) / 10,
@@ -190,8 +191,8 @@ function runDashboard() {
 
         return {
             actualAffected,
-            baseCohortTaxis,
-            annualTaxiCost,
+            baseCohortVehicles,
+            annualVehicleCost,
             s1Cost,
             s2Cost,
             s3Cost,
@@ -221,9 +222,12 @@ function runDashboard() {
         const model = runModel();
         const finalYear = model.yearsData[6]; // Year 7
 
+        const vehicleCostPerDay = parseFloat(inputs.vehicleCostPerDay.value);
+        const pupilsPerAltVehicle = parseFloat(inputs.vehicleCapacity.value);
+
         // Update read-only derived stats in control panel
         derivedDisplays.actualAffected.textContent = Math.round(model.actualAffected);
-        derivedDisplays.taxisRequired.textContent = (model.baseCohortTaxis).toFixed(1);
+        derivedDisplays.vehiclesRequired.textContent = (model.baseCohortVehicles).toFixed(1);
 
         // Update KPI panels
         const cumulative7YearSavings = finalYear.cumulativeNetSavings;
@@ -253,7 +257,7 @@ function runDashboard() {
             kpis.cardNetBalance.className = 'metric-card savings-alert';
         }
 
-        kpis.compoundedTaxiCost.textContent = formatGBP(finalYear.cumulativeTaxi);
+        kpis.compoundedVehicleCost.textContent = formatGBP(finalYear.cumulativeVehicle);
         kpis.disputeCost.textContent = formatGBP(finalYear.cumulativeAppeals);
         kpis.adminCost.textContent = formatGBP(finalYear.cumulativeAdmin);
 
@@ -290,7 +294,7 @@ function runDashboard() {
                 tr.className = 'highlight-row';
             }
 
-            const activeTaxi = activeViewMode === 'cumulative' ? yr.cumulativeTaxi : yr.spotTaxi;
+            const activeVehicle = activeViewMode === 'cumulative' ? yr.cumulativeVehicle : yr.spotVehicle;
             const activeAppeals = activeViewMode === 'cumulative' ? yr.cumulativeAppeals : yr.spotAppeals;
             const activeAdmin = activeViewMode === 'cumulative' ? yr.cumulativeAdmin : yr.spotAdmin;
             const activeTotal = activeViewMode === 'cumulative' ? yr.cumulativeTotal : yr.spotTotal;
@@ -299,7 +303,7 @@ function runDashboard() {
 
             tr.innerHTML = `
                 <td>Year ${yr.year}</td>
-                <td>${formatGBP(activeTaxi)}</td>
+                <td>${formatGBP(activeVehicle)}</td>
                 <td>${yr.s1Count.toFixed(1)} / ${yr.s2Count.toFixed(1)} / ${yr.s3Count.toFixed(1)}</td>
                 <td>${formatGBP(activeAppeals)}</td>
                 <td>${formatGBP(activeAdmin)}</td>
@@ -311,7 +315,7 @@ function runDashboard() {
         });
 
         // Populate Transport Unit Cost Comparison table
-        const annualTaxiPerPupil = (defaults.schoolDays * parseFloat(inputs.taxiCostPerDay.value)) / defaults.pupilsPerTaxi;
+        const annualVehiclePerPupil = (defaults.schoolDays * vehicleCostPerDay) / pupilsPerAltVehicle;
         tables.transportComparison.innerHTML = `
             <tr>
                 <td>Legacy Coach Pass (Bulk Rate)</td>
@@ -320,10 +324,10 @@ function runDashboard() {
                 <td>£850</td>
             </tr>
             <tr class="highlight-row">
-                <td>Bespoke Taxi / Minibus</td>
-                <td>3 Pupils (Rural Inefficient)</td>
-                <td>${formatGBP(parseFloat(inputs.taxiCostPerDay.value) * defaults.schoolDays)}</td>
-                <td>${formatGBP(annualTaxiPerPupil)}</td>
+                <td>Bespoke Alternative Vehicle</td>
+                <td>${pupilsPerAltVehicle} Pupils (Rural Inefficient)</td>
+                <td>${formatGBP(vehicleCostPerDay * defaults.schoolDays)}</td>
+                <td>${formatGBP(annualVehiclePerPupil)}</td>
             </tr>
         `;
 
@@ -419,7 +423,7 @@ function runDashboard() {
                                 fill: false
                             },
                             {
-                                label: 'STAG Projected Cost (Taxis+Appeals+Admin)',
+                                label: 'STAG Projected Cost (Alt Vehicles+Appeals+Admin)',
                                 data: dataCosts,
                                 borderColor: '#ff2a85', // protest pink
                                 backgroundColor: 'rgba(255, 42, 133, 0.05)',
@@ -744,8 +748,10 @@ function runDashboard() {
             // Format displays
             if (key === 'councilSavingsClaim') {
                 valText = formatGBP(valText);
-            } else if (key === 'taxiCostPerDay' || key === 'ongoingAdminCost' || key === 's1Cost' || key === 's2Cost' || key === 's3Cost') {
+            } else if (key === 'vehicleCostPerDay' || key === 'ongoingAdminCost' || key === 's1Cost' || key === 's2Cost' || key === 's3Cost') {
                 valText = '£' + parseFloat(valText).toLocaleString('en-GB');
+            } else if (key === 'vehicleCapacity') {
+                valText = parseInt(valText).toString();
             }
             
             values[key].textContent = `${valText}${unit}`;
@@ -761,7 +767,8 @@ function runDashboard() {
         inputs.childrenAffected.value = defaults.childrenAffected;
         inputs.optOutRate.value = defaults.optOutRate * 100;
         inputs.erosionRate.value = defaults.erosionRate * 100;
-        inputs.taxiCostPerDay.value = defaults.taxiCostPerDay;
+        inputs.vehicleCostPerDay.value = defaults.vehicleCostPerDay;
+        inputs.vehicleCapacity.value = defaults.pupilsPerAltVehicle;
         inputs.s1AppealsRate.value = defaults.s1AppealsRate * 100;
         inputs.s2AppealsRate.value = defaults.s2AppealsRate * 100;
         inputs.s3OmbudRate.value = defaults.s3OmbudRate * 100;
@@ -777,8 +784,10 @@ function runDashboard() {
             let valText = inputs[key].value;
             if (key === 'councilSavingsClaim') {
                 valText = formatGBP(valText);
-            } else if (key === 'taxiCostPerDay' || key === 'ongoingAdminCost' || key === 's1Cost' || key === 's2Cost' || key === 's3Cost') {
+            } else if (key === 'vehicleCostPerDay' || key === 'ongoingAdminCost' || key === 's1Cost' || key === 's2Cost' || key === 's3Cost') {
                 valText = '£' + parseFloat(valText).toLocaleString('en-GB');
+            } else if (key === 'vehicleCapacity') {
+                valText = parseInt(valText).toString();
             }
             values[key].textContent = `${valText}${unit}`;
         });
@@ -826,8 +835,10 @@ function runDashboard() {
         let valText = inputs[key].value;
         if (key === 'councilSavingsClaim') {
             valText = formatGBP(valText);
-        } else if (key === 'taxiCostPerDay' || key === 'ongoingAdminCost' || key === 's1Cost' || key === 's2Cost' || key === 's3Cost') {
+        } else if (key === 'vehicleCostPerDay' || key === 'ongoingAdminCost' || key === 's1Cost' || key === 's2Cost' || key === 's3Cost') {
             valText = '£' + parseFloat(valText).toLocaleString('en-GB');
+        } else if (key === 'vehicleCapacity') {
+            valText = parseInt(valText).toString();
         }
         values[key].textContent = `${valText}${unit}`;
     });

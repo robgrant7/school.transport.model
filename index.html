@@ -95,28 +95,36 @@
                 </div>
             </div>
 
-            <!-- Group: Taxi Parameters -->
+            <!-- Group: Alternative Vehicle Parameters -->
             <div class="control-group">
-                <div class="control-group-title">Transport (Taxis)</div>
+                <div class="control-group-title">Alternative Vehicles</div>
                 
                 <div class="slider-container">
                     <div class="slider-header">
-                        <span class="slider-label" id="label-taxi-cost">
-                            Cost per Taxi / Day
-                            <span class="tooltip-icon" data-tooltip="The daily charge of a single private hire taxi or minibus hired by the council to transport children.">?</span>
+                        <span class="slider-label" id="label-vehicle-cost">
+                            Alternative Vehicle Cost / Day
+                            <span class="tooltip-icon" data-tooltip="The daily contract charge of a single alternative vehicle (e.g., taxi, minibus) hired to transport children in place of the bus.">?</span>
                         </span>
-                        <span class="slider-value" id="val-taxi-cost">£125</span>
+                        <span class="slider-value" id="val-vehicle-cost">£125</span>
                     </div>
-                    <input type="range" id="input-taxi-cost" min="50" max="300" step="5" value="125" data-unit="" aria-labelledby="label-taxi-cost">
+                    <input type="range" id="input-vehicle-cost" min="50" max="300" step="5" value="125" data-unit="" aria-labelledby="label-vehicle-cost">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" id="label-vehicle-capacity">
+                            Pupils per Alt Vehicle
+                            <span class="tooltip-icon" data-tooltip="The average capacity of the alternative vehicle contract. Used to calculate how many alternative vehicles are required.">?</span>
+                        </span>
+                        <span class="slider-value" id="val-vehicle-capacity">3</span>
+                    </div>
+                    <input type="range" id="input-vehicle-capacity" min="1" max="16" step="1" value="3" data-unit="" aria-labelledby="label-vehicle-capacity">
                 </div>
 
                 <div class="derived-stats-box">
                     <div class="derived-stat-row">
-                        <span>Number of Taxis Required:</span>
-                        <span class="derived-stat-val" id="val-taxis-required">34</span>
-                    </div>
-                    <div class="derived-stat-row" style="font-size: 0.7rem; color: var(--text-muted);">
-                        <span>* Occupancy: 3 children / taxi</span>
+                        <span>Alternative Vehicles Required:</span>
+                        <span class="derived-stat-val" id="val-vehicles-required">34</span>
                     </div>
                 </div>
             </div>
@@ -243,9 +251,9 @@
                     <div class="metric-status-badge status-deficit" id="kpi-net-status-badge">COSTS EXCEED SAVINGS</div>
                 </div>
                 
-                <div class="metric-card" id="card-taxi-cost">
-                    <div class="metric-label">Compounded Taxi Cost (7 Yrs)</div>
-                    <div class="metric-value yellow-text" id="kpi-compounded-taxi">£17,227,447</div>
+                <div class="metric-card" id="card-vehicle-cost">
+                    <div class="metric-label">Alternative Vehicle Cost (7 Yrs)</div>
+                    <div class="metric-value yellow-text" id="kpi-compounded-vehicle">£17,227,447</div>
                     <div class="metric-subtext">Required free transport due to route fracturing</div>
                 </div>
 
@@ -288,7 +296,7 @@
             <div class="tab-container" id="tabs-details">
                 <div class="tab-headers">
                     <button class="tab-header active" data-tab="projection" id="tab-btn-projection">7-Year Breakdown Table</button>
-                    <button class="tab-header" data-tab="taxis" id="tab-btn-taxis">Transport Unit Costs</button>
+                    <button class="tab-header" data-tab="vehicles" id="tab-btn-vehicles">Alternative Vehicle Unit Costs</button>
                     <button class="tab-header" data-tab="appeals" id="tab-btn-appeals">Administrative Overhead</button>
                     <button class="tab-header" data-tab="strategy" id="tab-btn-strategy">Strategic Audit Briefing</button>
                 </div>
@@ -305,7 +313,7 @@
                                 <thead>
                                     <tr>
                                         <th>Year</th>
-                                        <th>Taxi Spot/Cum Cost</th>
+                                        <th>Alt Vehicle Spot/Cum Cost</th>
                                         <th>Appeals (S1 / S2 / S3) Count</th>
                                         <th>Appeals Spot/Cum Cost</th>
                                         <th>General Admin Spot/Cum Cost</th>
@@ -322,15 +330,15 @@
                     </div>
                 </div>
 
-                <!-- Tab Panel 2: Taxis -->
-                <div class="tab-panel" id="tab-panel-taxis">
+                <!-- Tab Panel 2: Vehicles -->
+                <div class="tab-panel" id="tab-panel-vehicles">
                     <div class="card">
                         <div class="card-title">
                             <span>Unit Cost Escalation: Legacy vs. Fragmented</span>
                             <span class="card-title-badge">Operational Realities</span>
                         </div>
                         <p style="margin-bottom: 15px; font-size: 0.9rem; color: var(--text-secondary);">
-                            Transitioning to a "nearest school only" policy fractures bus routes. Instead of transporting children on large-capacity coaches, the council is forced to commission bespoke daily taxi contracts for isolated rural pupils, resulting in a **1,390% increase** in per-pupil transport costs.
+                            Transitioning to a "nearest school only" policy fractures bus routes. Instead of transporting children on large-capacity coaches, the council is forced to commission bespoke daily alternative vehicle contracts for isolated rural pupils, resulting in a massive increase in per-pupil transport costs.
                         </p>
                         <div class="table-wrapper">
                             <table>
@@ -435,7 +443,7 @@
                 
                 <h3>How It Works</h3>
                 <ul>
-                    <li><strong>Cohort-Based Transport Costs:</strong> Since policy changes typically apply only to new intakes, older cohorts continue to run under existing arrangements. The model calculates taxi costs year-by-year, summing the active student cohorts in the system, each eroding by a set rate (attrition) over their 5-year school career.</li>
+                    <li><strong>Cohort-Based Transport Costs:</strong> Since policy changes typically apply only to new intakes, older cohorts continue to run under existing arrangements. The model calculates alternative vehicle costs year-by-year, summing the active student cohorts in the system, each eroding by a set rate (attrition) over their 5-year school career.</li>
                     <li><strong>Chained Appeal Progression:</strong> Disputing transport decisions escalates through three distinct, chained stages: Stage 1 (Internal Review), Stage 2 (Independent Panel), and Stage 3 (Ombudsman). The model chains these rates (e.g., Stage 2 is a percentage of Stage 1, not of the total population) and applies the selected unit costs to each dispute.</li>
                     <li><strong>Linear Savings Phasing:</strong> Claimed savings do not happen instantly. The model phases in the council's savings claim linearly over the 7-year rollout period, providing a realistic operational timeline.</li>
                     <li><strong>Ongoing Administration:</strong> Captures the yearly software, mapping, system update, and liaison overheads required to administer a fractured transport network.</li>
