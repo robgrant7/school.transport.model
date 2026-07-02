@@ -4,8 +4,8 @@
   "description": "Interactive Financial Model Dashboard for School Transport Action Group",
   "main": "main.js",
   "scripts": {
-    "start": "npx http-server -p 8000",
-    "dev": "npx http-server -p 8000"
+    "start": "npx http-server -c-1 -p 8000",
+    "dev": "npx http-server -c-1 -p 8000"
   },
   "keywords": [
     "stag",
