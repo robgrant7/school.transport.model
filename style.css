@@ -172,7 +172,7 @@ header {
 }
 
 .control-group.open .control-group-header::after {
-    content: '−';
+    content: '-';
 }
 
 .control-group-content {

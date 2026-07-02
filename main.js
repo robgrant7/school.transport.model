@@ -5,7 +5,6 @@ function runDashboard() {
     const defaults = {
         childrenAffected: 340,
         optOutRate: 0.70,     // 70%
-        erosionRate: 0.10,    // 10%
         observationWindow: 8, // 8 years
         vehicleCostPerDay: 125, // Taxi Cost / Day
         pupilsPerAltVehicle: 3, // Pupils per Taxi
@@ -35,7 +34,6 @@ function runDashboard() {
     const inputs = {
         childrenAffected: document.getElementById('input-children-affected'),
         optOutRate: document.getElementById('input-opt-out-rate'),
-        erosionRate: document.getElementById('input-erosion-rate'),
         vehicleCostPerDay: document.getElementById('input-vehicle-cost'),
         vehicleCapacity: document.getElementById('input-vehicle-capacity'),
         minibusCostPerDay: document.getElementById('input-minibus-cost'),
@@ -59,7 +57,6 @@ function runDashboard() {
     const values = {
         childrenAffected: document.getElementById('val-children-affected'),
         optOutRate: document.getElementById('val-opt-out-rate'),
-        erosionRate: document.getElementById('val-erosion-rate'),
         vehicleCostPerDay: document.getElementById('val-vehicle-cost'),
         vehicleCapacity: document.getElementById('val-vehicle-capacity'),
         minibusCostPerDay: document.getElementById('val-minibus-cost'),
@@ -127,7 +124,6 @@ function runDashboard() {
         // Read active parameters from DOM
         const childrenAffected = parseFloat(inputs.childrenAffected.value);
         const optOutRate = parseFloat(inputs.optOutRate.value) / 100;
-        const erosionRate = parseFloat(inputs.erosionRate.value) / 100;
         const vehicleCostPerDay = parseFloat(inputs.vehicleCostPerDay.value);
         const pupilsPerAltVehicle = parseFloat(inputs.vehicleCapacity.value);
         const minibusCostPerDay = parseFloat(inputs.minibusCostPerDay.value);
@@ -198,11 +194,11 @@ function runDashboard() {
         const yearsData = [];
 
         for (let t = 1; t <= 8; t++) {
-            // Alternative Vehicles Spot Cost: Sum of active cohorts in system (eroded based on their career age)
+            // Alternative Vehicles Spot Cost: Sum of active cohorts in system (no longer eroded)
             let spotVehicle = 0;
             let zonePop = 0;
             for (let age = 1; age <= Math.min(t, schoolCareer); age++) {
-                zonePop += (actualAffected * Math.pow(1 - erosionRate, age - 1)) / numberOfZones;
+                zonePop += actualAffected / numberOfZones;
             }
             const isolatedPupils = zonePop * isolationRate;
             const isolatedTaxis = isolatedPupils / pupilsPerAltVehicle;
@@ -223,8 +219,8 @@ function runDashboard() {
             spotVehicle = layerCostPerZone * numberOfZones * schoolDays;
             cumulativeVehicle += spotVehicle;
 
-            // Appeals Count: intake entering in Year t decays by the erosion rate
-            const cohortIntake = actualAffected * Math.pow(1 - erosionRate, t - 1);
+            // Appeals Count: intake entering in Year t
+            const cohortIntake = actualAffected;
             const s1Count = cohortIntake * s1AppealsRate;
             const s2Count = s1Count * s2AppealsRate;
             const s3Count = s2Count * s3OmbudRate;
@@ -493,7 +489,6 @@ function runDashboard() {
         // Read current slider inputs to display them in the modal
         const childrenAffected = parseFloat(inputs.childrenAffected.value);
         const optOutRate = parseFloat(inputs.optOutRate.value);
-        const erosionRate = parseFloat(inputs.erosionRate.value);
         const vehicleCostPerDay = parseFloat(inputs.vehicleCostPerDay.value);
         const pupilsPerAltVehicle = parseFloat(inputs.vehicleCapacity.value);
         const s1AppealsRate = parseFloat(inputs.s1AppealsRate.value);
@@ -664,10 +659,7 @@ function runDashboard() {
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
                     <strong>The Cohort Stack:</strong> Year 1 has only 1 displaced cohort (the new intake). Year 2 has 2 active displaced cohorts (Year 1's intake now in their 2nd school year, plus a brand new Year 2 intake). This stack grows every year until it peaks in Year 5 with <strong>5 active overlapping cohorts</strong>.
                 </li>
-                <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 10px; padding-left: 15px; position: relative;">
-                    <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
-                    <strong>Erosion (Attrition):</strong> We have provided this parameter to assume that a smaller volume of children will be affected over time as the policy becomes embedded (e.g., as families adapt, choose the nearest school, or make alternative travel arrangements). Each cohort's size is reduced by the selected <strong>Erosion Rate (${erosionRate}%)</strong> for each year they remain in the school system.
-                </li>
+
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 10px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
                     <strong>Why Year 8 is the Final Year of the Projection:</strong> By Year 8, the policy has been in place for 8 years, and the model shows the fully matured long-term financial state of the policy, containing the steady-state overlapping student cohorts.
@@ -1088,7 +1080,6 @@ function runDashboard() {
     buttons.reset.addEventListener('click', () => {
         inputs.childrenAffected.value = defaults.childrenAffected;
         inputs.optOutRate.value = defaults.optOutRate * 100;
-        inputs.erosionRate.value = defaults.erosionRate * 100;
         inputs.vehicleCostPerDay.value = defaults.vehicleCostPerDay;
         inputs.vehicleCapacity.value = defaults.pupilsPerAltVehicle;
         inputs.minibusCostPerDay.value = defaults.minibusCostPerDay;
@@ -1230,13 +1221,19 @@ function runDashboard() {
         }
     });
 
-    // Initialize sidebar accordions
+    // Initialize sidebar accordions with explicit style display toggles for cross-browser safety
     const controlGroups = document.querySelectorAll('.control-group');
     controlGroups.forEach(group => {
         const header = group.querySelector('.control-group-header');
-        if (header) {
+        const content = group.querySelector('.control-group-content');
+        if (header && content) {
+            // Set initial state to collapsed explicitly to ensure it works even if stylesheet is cached
+            content.style.display = 'none';
+            group.classList.remove('open');
+            
             header.addEventListener('click', () => {
-                group.classList.toggle('open');
+                const isOpen = group.classList.toggle('open');
+                content.style.display = isOpen ? 'block' : 'none';
             });
         }
     });

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STAG School Transport Financial Model Dashboard</title>
     <meta name="description" content="An interactive, data-driven financial model auditing the claims of North Yorkshire Council's school transport policy shift from catchment to nearest school only.">
-    <link rel="stylesheet" href="style.css?v=1.0.6">
+    <link rel="stylesheet" href="style.css?v=1.0.7">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -77,16 +77,7 @@
                         <input type="range" id="input-opt-out-rate" min="0" max="100" step="5" value="70" data-unit="%" aria-labelledby="label-opt-out-rate">
                     </div>
 
-                    <div class="slider-container">
-                        <div class="slider-header">
-                            <span class="slider-label" id="label-erosion-rate">
-                                Erosion Rate (Attrition)
-                                <span class="tooltip-icon" data-tooltip="The percentage by which the student cohorts shrink each year due to families moving, changing schools, or growing older.">?</span>
-                            </span>
-                            <span class="slider-value" id="val-erosion-rate">10%</span>
-                        </div>
-                        <input type="range" id="input-erosion-rate" min="0" max="30" step="1" value="10" data-unit="%" aria-labelledby="label-erosion-rate">
-                    </div>
+
 
                     <!-- Derived Read-only population values -->
                     <div class="derived-stats-box">
@@ -605,6 +596,6 @@
         </div>
     </div>
 
-    <script src="main.js?v=1.0.6"></script>
+    <script src="main.js?v=1.0.7"></script>
 </body>
 </html>
