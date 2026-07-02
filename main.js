@@ -74,7 +74,10 @@ function runDashboard() {
         costCoverageLabel: document.getElementById('kpi-cost-coverage-label'),
         costCoverageSubtext: document.getElementById('kpi-cost-coverage-subtext'),
         cardNetBalance: document.getElementById('card-net-balance'),
-        cardCostCoverage: document.getElementById('card-cost-coverage')
+        cardCostCoverage: document.getElementById('card-cost-coverage'),
+        policyVerdict: document.getElementById('kpi-policy-verdict'),
+        verdictSubtext: document.getElementById('kpi-verdict-subtext'),
+        cardPolicyVerdict: document.getElementById('card-policy-verdict')
     };
 
     const tables = {
@@ -244,6 +247,12 @@ function runDashboard() {
             
             // Card outline
             kpis.cardNetBalance.className = 'metric-card deficit-alert';
+
+            // Policy Verdict
+            kpis.policyVerdict.className = 'metric-value deficit-text';
+            kpis.policyVerdict.textContent = 'Bad Policy Decision';
+            kpis.verdictSubtext.textContent = 'Projected costs exceed claimed savings';
+            kpis.cardPolicyVerdict.className = 'metric-card deficit-alert';
         } else {
             kpis.netSavings.className = 'metric-value savings-text';
             kpis.netSavingsLabel.textContent = '7-Year Net Cumulative Balance';
@@ -255,6 +264,12 @@ function runDashboard() {
             
             // Card outline
             kpis.cardNetBalance.className = 'metric-card savings-alert';
+
+            // Policy Verdict
+            kpis.policyVerdict.className = 'metric-value savings-text';
+            kpis.policyVerdict.textContent = 'Good Policy Decision';
+            kpis.verdictSubtext.textContent = 'Projected savings exceed costs';
+            kpis.cardPolicyVerdict.className = 'metric-card savings-alert';
         }
 
         kpis.compoundedVehicleCost.textContent = formatGBP(finalYear.cumulativeVehicle);
