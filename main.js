@@ -353,8 +353,143 @@ function runDashboard() {
             </tr>
         `;
 
+        // Update Year 1 At a Glance Modal HTML
+        updateYear1ModalContent(model);
+
         // Update Chart.js Data
         renderChart(model.yearsData);
+    }
+
+    function updateYear1ModalContent(model) {
+        // Read current slider inputs to display them in the modal
+        const childrenAffected = parseFloat(inputs.childrenAffected.value);
+        const optOutRate = parseFloat(inputs.optOutRate.value);
+        const vehicleCostPerDay = parseFloat(inputs.vehicleCostPerDay.value);
+        const pupilsPerAltVehicle = parseFloat(inputs.vehicleCapacity.value);
+        const s1AppealsRate = parseFloat(inputs.s1AppealsRate.value);
+        const s2AppealsRate = parseFloat(inputs.s2AppealsRate.value);
+        const s3OmbudRate = parseFloat(inputs.s3OmbudRate.value);
+        const s1Cost = parseFloat(inputs.s1Cost.value);
+        const s2Cost = parseFloat(inputs.s2Cost.value);
+        const s3Cost = parseFloat(inputs.s3Cost.value);
+        const ongoingAdminCost = parseFloat(inputs.ongoingAdminCost.value);
+        const councilSavingsClaim = parseFloat(inputs.councilSavingsClaim.value);
+        
+        // Calculations
+        const actualAffected = model.actualAffected;
+        const baseCohortVehicles = model.baseCohortVehicles;
+        const annualVehicleCost = model.annualVehicleCost;
+        
+        // Appeals math
+        const s1Count = actualAffected * (s1AppealsRate / 100);
+        const s2Count = s1Count * (s2AppealsRate / 100);
+        const s3Count = s2Count * (s3OmbudRate / 100);
+        
+        const costS1 = s1Count * s1Cost;
+        const costS2 = s2Count * s2Cost;
+        const costS3 = s3Count * s3Cost;
+        const totalAppealsCost = costS1 + costS2 + costS3;
+        
+        // Savings math
+        const peakSavingsY7 = councilSavingsClaim / 4;
+        const phasedSavingsY1 = peakSavingsY7 * (1 / 7);
+        
+        const totalCostY1 = annualVehicleCost + totalAppealsCost + ongoingAdminCost;
+        const netY1 = phasedSavingsY1 - totalCostY1;
+
+        const bodyElement = document.getElementById('modal-year1-body');
+        if (!bodyElement) return;
+
+        bodyElement.innerHTML = `
+            <p style="margin-bottom: 20px; font-size: 0.95rem;">Below is the exact step-by-step arithmetic showing how the Year 1 figures are calculated from your current slider parameters. All calculations are rounded to the nearest pound.</p>
+            
+            <h3 style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 6px; margin-top: 15px; color: var(--protest-blue); font-family: var(--font-heading); font-size: 1.25rem;">Step 1: Calculate the Displaced Student Population</h3>
+            <ul style="list-style-type: none; padding-left: 0; margin-bottom: 15px;">
+                <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
+                    <strong>Children Affected:</strong> ${childrenAffected.toLocaleString()} pupils are estimated to lose their legacy transport paths.
+                </li>
+                <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
+                    <strong>Opt-Out Rate:</strong> ${optOutRate}% choose to travel independently or walk.
+                </li>
+                <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
+                    <strong>Actual Displaced Cohort:</strong> <strong style="color: var(--text-primary);">${actualAffected.toFixed(1)} pupils</strong> require alternative arrangements.<br>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">Formula: ${childrenAffected} × (1 - ${optOutRate / 100}) = ${actualAffected.toFixed(1)}</span>
+                </li>
+            </ul>
+
+            <h3 style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 6px; margin-top: 15px; color: var(--protest-blue); font-family: var(--font-heading); font-size: 1.25rem;">Step 2: Calculate Year 1 Transport Cost</h3>
+            <ul style="list-style-type: none; padding-left: 0; margin-bottom: 15px;">
+                <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
+                    <strong>Pupils per Alt Vehicle:</strong> Each alternative vehicle holds an average of ${pupilsPerAltVehicle} pupils.
+                </li>
+                <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
+                    <strong>Alternative Vehicles Required:</strong> <strong style="color: var(--text-primary);">${baseCohortVehicles.toFixed(1)} vehicles</strong> must be commissioned.<br>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">Formula: ${actualAffected.toFixed(1)} / ${pupilsPerAltVehicle} = ${baseCohortVehicles.toFixed(1)}</span>
+                </li>
+                <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
+                    <strong>Daily Cost:</strong> £${vehicleCostPerDay} per day per vehicle contract.
+                </li>
+                <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
+                    <strong>Annual Transport Cost:</strong> <strong style="color: var(--text-primary);">${formatGBP(annualVehicleCost)}</strong> for Year 1 (190 school days).<br>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">Formula: ${baseCohortVehicles.toFixed(1)} vehicles × £${vehicleCostPerDay} × 190 days = ${formatGBP(annualVehicleCost)}</span>
+                </li>
+            </ul>
+
+            <h3 style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 6px; margin-top: 15px; color: var(--protest-blue); font-family: var(--font-heading); font-size: 1.25rem;">Step 3: Calculate Dispute Overhead</h3>
+            <ul style="list-style-type: none; padding-left: 0; margin-bottom: 15px;">
+                <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
+                    <strong>Stage 1 (Internal Review):</strong> ${s1AppealsRate}% of displaced pupils appeal. ${s1Count.toFixed(1)} appeals at £${s1Cost} each = <strong style="color: var(--text-primary);">${formatGBP(costS1)}</strong>.
+                </li>
+                <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
+                    <strong>Stage 2 (Independent Panel):</strong> ${s2AppealsRate}% of Stage 1 escalate. ${s2Count.toFixed(1)} hearings at £${s2Cost} each = <strong style="color: var(--text-primary);">${formatGBP(costS2)}</strong>.
+                </li>
+                <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
+                    <strong>Stage 3 (Ombudsman):</strong> ${s3OmbudRate}% of Stage 2 escalate. ${s3Count.toFixed(1)} complaints at £${s3Cost} each = <strong style="color: var(--text-primary);">${formatGBP(costS3)}</strong>.
+                </li>
+                <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
+                    <strong>Total Year 1 Dispute Cost:</strong> <strong style="color: var(--text-primary);">${formatGBP(totalAppealsCost)}</strong>.<br>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">Formula: ${formatGBP(costS1)} + ${formatGBP(costS2)} + ${formatGBP(costS3)} = ${formatGBP(totalAppealsCost)}</span>
+                </li>
+            </ul>
+
+            <h3 style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 6px; margin-top: 15px; color: var(--protest-blue); font-family: var(--font-heading); font-size: 1.25rem;">Step 4: Year 1 Consolidation</h3>
+            <ul style="list-style-type: none; padding-left: 0; margin-bottom: 15px;">
+                <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
+                    <strong>General Administration Cost:</strong> <strong style="color: var(--text-primary);">${formatGBP(ongoingAdminCost)}</strong> (mapping, database, and system overheads).
+                </li>
+                <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
+                    <strong>Total Year 1 Costs:</strong> <strong style="color: var(--text-primary);">${formatGBP(totalCostY1)}</strong>.<br>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">Formula: ${formatGBP(annualVehicleCost)} (Transport) + ${formatGBP(totalAppealsCost)} (Disputes) + ${formatGBP(ongoingAdminCost)} (Admin) = ${formatGBP(totalCostY1)}</span>
+                </li>
+                <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
+                    <strong>Phased Claimed Savings:</strong> <strong style="color: var(--text-primary);">${formatGBP(phasedSavingsY1)}</strong> (Year 1 share of the 7-year savings claim).<br>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">Formula: (£${(councilSavingsClaim).toLocaleString()} / 4 peak) × (1 / 7 years) = ${formatGBP(phasedSavingsY1)}</span>
+                </li>
+                <li style="margin-top: 20px; font-size: 1.05rem; padding: 15px; background: rgba(255,42,133,0.06); border-left: 3px solid ${netY1 < 0 ? 'var(--protest-pink)' : 'var(--protest-green)'}; border-radius: 0 4px 4px 0;">
+                    <strong style="color: var(--text-primary);">Year 1 Net Balance:</strong> <strong class="${netY1 < 0 ? 'deficit-text' : 'savings-text'}">${formatGBP(netY1)}</strong>.<br>
+                    <span style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px; display: block; line-height: 1.45;">
+                        ${netY1 < 0 
+                            ? `🚨 In Year 1, alternative vehicle and dispute costs exceed phased savings, resulting in a net deficit of <strong>${formatGBP(Math.abs(netY1))}</strong>.` 
+                            : `✅ In Year 1, the policy generates a net surplus of <strong>${formatGBP(netY1)}</strong>.`
+                        }
+                    </span>
+                </li>
+            </ul>
+        `;
     }
 
     // -------------------------------------------------------------
@@ -843,10 +978,14 @@ function runDashboard() {
         values[key].textContent = `${valText}${unit}`;
     });
     
-    // Modal controls for "How this model works"
+    // Modal controls for "How this model works" & "Year 1 At a Glance"
     const modal = document.getElementById('modal-info');
     const btnHowItWorks = document.getElementById('btn-how-it-works');
     const closeBtn = document.getElementById('modal-close-btn');
+
+    const modalY1 = document.getElementById('modal-year1');
+    const btnYear1Glance = document.getElementById('btn-year1-glance');
+    const closeBtnY1 = document.getElementById('modal-year1-close-btn');
 
     if (btnHowItWorks && modal && closeBtn) {
         btnHowItWorks.addEventListener('click', () => {
@@ -856,14 +995,27 @@ function runDashboard() {
         closeBtn.addEventListener('click', () => {
             modal.style.display = 'none';
         });
+    }
 
-        // Close when clicking outside content box
-        window.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
+    if (btnYear1Glance && modalY1 && closeBtnY1) {
+        btnYear1Glance.addEventListener('click', () => {
+            modalY1.style.display = 'flex';
+        });
+
+        closeBtnY1.addEventListener('click', () => {
+            modalY1.style.display = 'none';
         });
     }
+
+    // Close when clicking outside of either modal content box
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+        if (e.target === modalY1) {
+            modalY1.style.display = 'none';
+        }
+    });
 
     // Initial render
     updateUI();

@@ -304,9 +304,12 @@
                 <!-- Tab Panel 1: Breakdown Table -->
                 <div class="tab-panel active" id="tab-panel-projection">
                     <div class="card">
-                        <div class="card-title">
+                        <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                             <span>Annual Financial Breakdown</span>
-                            <span class="card-title-badge">Dynamic Output</span>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <button id="btn-year1-glance" class="btn btn-primary" style="padding: 4px 10px; font-size: 0.7rem; cursor: pointer; border: none; font-family: var(--font-heading); background-color: var(--protest-yellow); color: #000000;">🔍 Year 1 At a Glance</button>
+                                <span class="card-title-badge">Dynamic Output</span>
+                            </div>
                         </div>
                         <div class="table-wrapper">
                             <table id="table-annual-breakdown">
@@ -455,6 +458,17 @@
                     <li><strong>Accurate Appellate Chaining:</strong> By modeling appeals as a funnel (Stage 2 funnels from Stage 1; Ombudsman funnels from Stage 2), the model reflects actual administrative volumes and legal escalation rates.</li>
                     <li><strong>Audited Cost Parameters:</strong> Default unit costs and dispute rates are derived from audited local government accounts and historic appeals volumes, ensuring realistic baseline projections.</li>
                 </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Year 1 At a Glance -->
+    <div id="modal-year1" class="modal-overlay">
+        <div class="modal-content" style="max-width: 700px;">
+            <span class="modal-close" id="modal-year1-close-btn">&times;</span>
+            <h2 class="modal-title">Year 1 Audit: Step-by-Step Breakdown</h2>
+            <div class="modal-body" id="modal-year1-body">
+                <!-- Dynamic text populated from main.js -->
             </div>
         </div>
     </div>
