@@ -35,10 +35,11 @@ When the council cancels a large-capacity bus route to restrict travel to the "n
 
 *   **Active Pupils per Zone**: The total active displaced cohort population in Year $t$ is divided equally across the **Feeder Zones / Clusters** (default: 50).
 *   **Rural Isolation**: A percentage of the zone's population (defined by the **Isolation Rate**, default 25%) live down remote single-track roads or lanes, requiring individual standard Taxis (capacity: 3).
-*   **Consolidation Group**: The remaining pupils in the zone (non-isolated) travel together:
-    *   If their number is **less than the Minibus Threshold** (default: 8), they are transported using standard Taxis (capacity: 3) at the standard contract rate.
-    *   If their number is **greater than or equal to the Minibus Threshold**, they consolidate into a larger vehicle and are automatically upgraded to a Minibus contract (capacity: 16; contract cost: 1.5x of the standard vehicle cost).
-*   **Aggregation**: Taxis and Minibus contracts are summed for a single zone, multiplied by the **number of zones**, and multiplied by **190 school days** to compute the annual spot vehicle cost for Year $t$.
+*   **Consolidation Group**: The remaining pupils in the zone (non-isolated) consolidate:
+    *   **Tier 1 (Taxi)**: If their number is **less than the Minibus Threshold** (default: 8), they use standard Taxis (capacity: 3).
+    *   **Tier 2 (Minibus)**: If their number is **greater than or equal to the Minibus Threshold BUT less than the Coach Threshold** (default: 17), they upgrade to a Minibus contract (capacity: 16; cost: 1.5x standard).
+    *   **Tier 3 (Coach)**: If their number is **greater than or equal to the Coach Threshold**, they consolidate into a full-sized Coach contract (capacity: 50; cost: 3x standard to reflect bulk commercial coach rates).
+*   **Aggregation**: Taxis, Minibuses, and Coach contracts are summed for a single zone, multiplied by the **number of zones**, and multiplied by **190 school days** to compute the annual spot vehicle cost for Year $t$.
 
 ### 2. Chained Appeals Overhead
 Families who lose free transport rights can appeal the council's decision. This cost is calculated as a sequential funnel:
