@@ -6,7 +6,7 @@ function runDashboard() {
         childrenAffected: 340,
         optOutRate: 0.70,     // 70%
         erosionRate: 0.10,    // 10%
-        observationWindow: 7, // 7 years
+        observationWindow: 8, // 8 years
         vehicleCostPerDay: 125,
         pupilsPerAltVehicle: 3,
         schoolDays: 190,
@@ -18,7 +18,7 @@ function runDashboard() {
         s2Cost: 750,
         s3Cost: 1400,
         ongoingAdminCost: 20000,
-        councilSavingsClaim: 4000000 // Cumulative over 7 years
+        councilSavingsClaim: 4263445 // Annual savings at Year 8 maturity
     };
 
     // -------------------------------------------------------------
@@ -126,8 +126,17 @@ function runDashboard() {
         const baseCohortVehicles = actualAffected / pupilsPerAltVehicle;
         const annualVehicleCost = baseCohortVehicles * vehicleCostPerDay * schoolDays;
 
-        // Peak annual savings S in Year 7: 4 * S = claim => S = claim / 4
-        const peakSavingsY7 = councilSavingsClaim / 4;
+        // Phased council savings weights matching the spreadsheet implementation steps
+        const savingsPhasingWeights = [
+            840800 / 4263445,
+            1594191 / 4263445,
+            2390050 / 4263445,
+            3146036 / 4263445,
+            3586200 / 4263445,
+            4026363 / 4263445,
+            4133978 / 4263445,
+            1.0
+        ];
 
         let cumulativeVehicle = 0;
         let cumulativeAppealsTotal = 0;
@@ -136,7 +145,7 @@ function runDashboard() {
 
         const yearsData = [];
 
-        for (let t = 1; t <= 7; t++) {
+        for (let t = 1; t <= 8; t++) {
             // Alternative Vehicles Spot Cost: Sum of active cohorts in system (eroded based on their career age)
             let spotVehicle = 0;
             for (let age = 1; age <= Math.min(t, schoolCareer); age++) {
@@ -162,8 +171,8 @@ function runDashboard() {
             const spotAdmin = ongoingAdminCost;
             cumulativeAdmin += spotAdmin;
 
-            // Claimed Savings (Phased in linearly: Savings(t) = peak * t / 7)
-            const spotCouncilSavings = peakSavingsY7 * (t / 7);
+            // Claimed Savings (Phased based on maturity weights)
+            const spotCouncilSavings = councilSavingsClaim * savingsPhasingWeights[t - 1];
             cumulativeCouncilSavings += spotCouncilSavings;
 
             const spotTotal = spotVehicle + spotAppeals + spotAdmin;
@@ -223,7 +232,7 @@ function runDashboard() {
     function updateUI() {
         // Run model to extract calculations
         const model = runModel();
-        const finalYear = model.yearsData[6]; // Year 7
+        const finalYear = model.yearsData[model.yearsData.length - 1]; // Year 8
 
         const vehicleCostPerDay = parseFloat(inputs.vehicleCostPerDay.value);
         const pupilsPerAltVehicle = parseFloat(inputs.vehicleCapacity.value);
@@ -238,7 +247,7 @@ function runDashboard() {
         
         if (cumulative7YearSavings < 0) {
             kpis.netSavings.className = 'metric-value deficit-text';
-            kpis.netSavingsLabel.textContent = '7-Year Net Cumulative Balance';
+            kpis.netSavingsLabel.textContent = '8-Year Net Cumulative Balance';
             kpis.netSubtext.textContent = 'True fiscal outcome after costs are deducted';
             
             // Status Badge
@@ -255,7 +264,7 @@ function runDashboard() {
             kpis.cardPolicyVerdict.className = 'metric-card deficit-alert';
         } else {
             kpis.netSavings.className = 'metric-value savings-text';
-            kpis.netSavingsLabel.textContent = '7-Year Net Cumulative Balance';
+            kpis.netSavingsLabel.textContent = '8-Year Net Cumulative Balance';
             kpis.netSubtext.textContent = 'True fiscal outcome after costs are deducted';
             
             // Status Badge
@@ -305,7 +314,7 @@ function runDashboard() {
             const tr = document.createElement('tr');
             
             // Highlight final year
-            if (yr.year === 7) {
+            if (yr.year === 8) {
                 tr.className = 'highlight-row';
             }
 
@@ -406,9 +415,18 @@ function runDashboard() {
         const costS3 = s3Count * s3Cost;
         const totalAppealsCost = costS1 + costS2 + costS3;
         
-        // Savings math
-        const peakSavingsY7 = councilSavingsClaim / 4;
-        const phasedSavingsY1 = peakSavingsY7 * (1 / 7);
+        // Phased council savings weights matching the spreadsheet implementation steps
+        const savingsPhasingWeights = [
+            840800 / 4263445,
+            1594191 / 4263445,
+            2390050 / 4263445,
+            3146036 / 4263445,
+            3586200 / 4263445,
+            4026363 / 4263445,
+            4133978 / 4263445,
+            1.0
+        ];
+        const phasedSavingsY1 = councilSavingsClaim * savingsPhasingWeights[0];
         
         const totalCostY1 = annualVehicleCost + totalAppealsCost + ongoingAdminCost;
         const netY1 = phasedSavingsY1 - totalCostY1;
@@ -492,8 +510,8 @@ function runDashboard() {
                 </li>
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
-                    <strong>Phased Claimed Savings:</strong> <strong style="color: var(--text-primary);">${formatGBP(phasedSavingsY1)}</strong> (Year 1 share of the 7-year savings claim).<br>
-                    <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">Formula: (£${(councilSavingsClaim).toLocaleString()} / 4 peak) × (1 / 7 years) = ${formatGBP(phasedSavingsY1)}</span>
+                    <strong>Phased Claimed Savings:</strong> <strong style="color: var(--text-primary);">${formatGBP(phasedSavingsY1)}</strong> (Year 1 share of the 8-year savings claim).<br>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">Formula: £${(councilSavingsClaim).toLocaleString()} × 19.72% (Year 1 Phasing Weight) = ${formatGBP(phasedSavingsY1)}</span>
                 </li>
                 <li style="margin-top: 20px; font-size: 1.05rem; padding: 15px; background: rgba(255,42,133,0.06); border-left: 3px solid ${netY1 < 0 ? 'var(--protest-pink)' : 'var(--protest-green)'}; border-radius: 0 4px 4px 0;">
                     <strong style="color: var(--text-primary);">Year 1 Year-End Net Balance:</strong> <strong class="${netY1 < 0 ? 'deficit-text' : 'savings-text'}">${formatGBP(netY1)}</strong>.<br>
@@ -506,7 +524,7 @@ function runDashboard() {
                 </li>
             </ul>
 
-            <h3 style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 6px; margin-top: 25px; color: var(--protest-blue); font-family: var(--font-heading); font-size: 1.25rem;">How This Expands Over 7 Years</h3>
+            <h3 style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 6px; margin-top: 25px; color: var(--protest-blue); font-family: var(--font-heading); font-size: 1.25rem;">How This Expands Over 8 Years</h3>
             <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px;">
                 Councillors often ask why costs grow so rapidly in subsequent years. The model reflects a rolling 5-year school career:
             </p>
@@ -521,7 +539,7 @@ function runDashboard() {
                 </li>
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 10px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
-                    <strong>Why Year 7 is the Peak:</strong> By Year 7, the policy is fully phased in. The system contains 5 full, overlapping student cohorts (each partially eroded by age), driving Year 7 transport costs to their maximum levels.
+                    <strong>Why Year 8 is the Final Year of the Projection:</strong> By Year 8, the policy has been in place for 8 years, and the model shows the fully matured long-term financial state of the policy, containing the steady-state overlapping student cohorts.
                 </li>
             </ul>
         `;
@@ -755,7 +773,7 @@ function runDashboard() {
 
         // Scale functions
         function getX(index) {
-            return margin.left + index * (graphWidth / 6);
+            return margin.left + index * (graphWidth / (yearsData.length - 1));
         }
 
         function getY(val) {
@@ -805,7 +823,7 @@ function runDashboard() {
         }
 
         // Draw X Axis labels
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < yearsData.length; i++) {
             const xPos = getX(i);
             const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             text.setAttribute('x', xPos);
@@ -840,7 +858,7 @@ function runDashboard() {
         svg.appendChild(pathCosts);
 
         // 3. Net Savings Area Path
-        const areaData = getPathData(dataNet) + ` L ${getX(6)} ${getY(minVal)} L ${getX(0)} ${getY(minVal)} Z`;
+        const areaData = getPathData(dataNet) + ` L ${getX(yearsData.length - 1)} ${getY(minVal)} L ${getX(0)} ${getY(minVal)} Z`;
         const areaNet = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         areaNet.setAttribute('d', areaData);
         areaNet.setAttribute('fill', 'rgba(0, 210, 255, 0.03)');
