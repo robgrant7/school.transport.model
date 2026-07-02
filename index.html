@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STAG School Transport Financial Model Dashboard</title>
     <meta name="description" content="An interactive, data-driven financial model auditing the claims of North Yorkshire Council's school transport policy shift from catchment to nearest school only.">
-    <link rel="stylesheet" href="style.css?v=1.0.5">
+    <link rel="stylesheet" href="style.css?v=1.0.6">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -166,6 +166,17 @@
                         <span class="slider-value" id="val-minibus-threshold">8</span>
                     </div>
                     <input type="range" id="input-minibus-threshold" min="2" max="20" step="1" value="8" aria-labelledby="label-minibus-threshold">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" id="label-coach-threshold">
+                            Coach Threshold
+                            <span class="tooltip-icon" data-tooltip="The minimum number of active non-isolated pupils in a zone required to transition the consolidated group from a minibus to a coach.">?</span>
+                        </span>
+                        <span class="slider-value" id="val-coach-threshold">17</span>
+                    </div>
+                    <input type="range" id="input-coach-threshold" min="10" max="50" step="1" value="17" aria-labelledby="label-coach-threshold">
                 </div>
             </div>
 
@@ -530,10 +541,13 @@
                 
                 <h3>The Minibus Threshold</h3>
                 <p>Models how costs behave in the real world. In Years 1–2, low student density forces high reliance on individual taxis. Only when the 5-year cohort stack builds up over time do village clusters reach a critical mass (the threshold) that allows the council to upgrade to a consolidated minibus (capacity of 16, costing 1.5x of a standard taxi contract).</p>
+                
+                <h3>The Coach Threshold</h3>
+                <p>Models the long-term saturation of the policy. In Years 5–8, as the rolling 5-year cohort stack completely fills up, certain high-density primary feeder zones will hit critical mass (17+ active pupils). At this point, the model dynamically rewards the council by consolidating the minibus route back into a full-capacity coach contract, accurately reflecting the long-term stabilization of a fully embedded transport network.</p>
             </div>
         </div>
     </div>
 
-    <script src="main.js?v=1.0.5"></script>
+    <script src="main.js?v=1.0.6"></script>
 </body>
 </html>
