@@ -18,7 +18,7 @@ function runDashboard() {
         s2Cost: 750,
         s3Cost: 1400,
         ongoingAdminCost: 20000,
-        councilSavingsClaim: 3000000 // Cumulative over 7 years
+        councilSavingsClaim: 4000000 // Cumulative over 7 years
     };
 
     // -------------------------------------------------------------
@@ -364,6 +364,7 @@ function runDashboard() {
         // Read current slider inputs to display them in the modal
         const childrenAffected = parseFloat(inputs.childrenAffected.value);
         const optOutRate = parseFloat(inputs.optOutRate.value);
+        const erosionRate = parseFloat(inputs.erosionRate.value);
         const vehicleCostPerDay = parseFloat(inputs.vehicleCostPerDay.value);
         const pupilsPerAltVehicle = parseFloat(inputs.vehicleCapacity.value);
         const s1AppealsRate = parseFloat(inputs.s1AppealsRate.value);
@@ -480,13 +481,32 @@ function runDashboard() {
                     <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">Formula: (£${(councilSavingsClaim).toLocaleString()} / 4 peak) × (1 / 7 years) = ${formatGBP(phasedSavingsY1)}</span>
                 </li>
                 <li style="margin-top: 20px; font-size: 1.05rem; padding: 15px; background: rgba(255,42,133,0.06); border-left: 3px solid ${netY1 < 0 ? 'var(--protest-pink)' : 'var(--protest-green)'}; border-radius: 0 4px 4px 0;">
-                    <strong style="color: var(--text-primary);">Year 1 Net Balance:</strong> <strong class="${netY1 < 0 ? 'deficit-text' : 'savings-text'}">${formatGBP(netY1)}</strong>.<br>
+                    <strong style="color: var(--text-primary);">Year 1 Year-End Net Balance:</strong> <strong class="${netY1 < 0 ? 'deficit-text' : 'savings-text'}">${formatGBP(netY1)}</strong>.<br>
                     <span style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px; display: block; line-height: 1.45;">
                         ${netY1 < 0 
                             ? `🚨 In Year 1, alternative vehicle and dispute costs exceed phased savings, resulting in a net deficit of <strong>${formatGBP(Math.abs(netY1))}</strong>.` 
                             : `✅ In Year 1, the policy generates a net surplus of <strong>${formatGBP(netY1)}</strong>.`
                         }
                     </span>
+                </li>
+            </ul>
+
+            <h3 style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 6px; margin-top: 25px; color: var(--protest-blue); font-family: var(--font-heading); font-size: 1.25rem;">How This Expands Over 7 Years</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px;">
+                Councillors often ask why costs grow so rapidly in subsequent years. The model reflects a rolling 5-year school career:
+            </p>
+            <ul style="list-style-type: none; padding-left: 0; margin-bottom: 15px;">
+                <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 10px; padding-left: 15px; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
+                    <strong>The Cohort Stack:</strong> Year 1 has only 1 displaced cohort (the new intake). Year 2 has 2 active displaced cohorts (Year 1's intake now in their 2nd school year, plus a brand new Year 2 intake). This stack grows every year until it peaks in Year 5 with <strong>5 active overlapping cohorts</strong>.
+                </li>
+                <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 10px; padding-left: 15px; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
+                    <strong>Erosion (Attrition):</strong> Over time, cohorts naturally shrink. The model reduces each cohort's size by the selected <strong>Erosion Rate (${erosionRate}%)</strong> for every year they remain in the school system (due to families moving or changing schools).
+                </li>
+                <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 10px; padding-left: 15px; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
+                    <strong>Why Year 7 is the Peak:</strong> By Year 7, the policy is fully phased in. The system contains 5 full, overlapping student cohorts (each partially eroded by age), driving Year 7 transport costs to their maximum levels.
                 </li>
             </ul>
         `;

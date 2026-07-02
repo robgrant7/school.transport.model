@@ -39,8 +39,9 @@
             <h1 class="logo-title">INDEPENDENT COST ANALYSIS MODEL</h1>
             <div class="logo-subtitle">Home to School Transport Policy Audit</div>
         </div>
-        <div class="header-meta">
+        <div class="header-meta" style="display: flex; gap: 10px;">
             <button class="cohort-tag" id="btn-how-it-works" style="cursor: pointer; border: none; outline: none;">How this model works</button>
+            <button class="cohort-tag" id="btn-year1-glance" style="cursor: pointer; border: none; outline: none; background-color: var(--protest-yellow); color: #000000;">Year 1 At a Glance</button>
         </div>
     </header>
 
@@ -228,9 +229,9 @@
                             7-Yr Cumulative Claimed Savings
                             <span class="tooltip-icon" data-tooltip="The total cumulative savings that the council claims this policy will generate over the next 7 years.">?</span>
                         </span>
-                        <span class="slider-value" id="val-council-savings">£3,000,000</span>
+                        <span class="slider-value" id="val-council-savings">£4,000,000</span>
                     </div>
-                    <input type="range" id="input-council-savings" min="500000" max="10000000" step="250000" value="3000000" aria-labelledby="label-council-savings">
+                    <input type="range" id="input-council-savings" min="500000" max="10000000" step="250000" value="4000000" aria-labelledby="label-council-savings">
                 </div>
             </div>
 
@@ -304,12 +305,9 @@
                 <!-- Tab Panel 1: Breakdown Table -->
                 <div class="tab-panel active" id="tab-panel-projection">
                     <div class="card">
-                        <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div class="card-title">
                             <span>Annual Financial Breakdown</span>
-                            <div style="display: flex; gap: 8px; align-items: center;">
-                                <button id="btn-year1-glance" class="btn btn-primary" style="padding: 4px 10px; font-size: 0.7rem; cursor: pointer; border: none; font-family: var(--font-heading); background-color: var(--protest-yellow); color: #000000;">🔍 Year 1 At a Glance</button>
-                                <span class="card-title-badge">Dynamic Output</span>
-                            </div>
+                            <span class="card-title-badge">Dynamic Output</span>
                         </div>
                         <div class="table-wrapper">
                             <table id="table-annual-breakdown">
