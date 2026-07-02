@@ -502,7 +502,7 @@ function runDashboard() {
                 </li>
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 10px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
-                    <strong>Erosion (Attrition):</strong> Over time, cohorts naturally shrink. The model reduces each cohort's size by the selected <strong>Erosion Rate (${erosionRate}%)</strong> for every year they remain in the school system (due to families moving or changing schools).
+                    <strong>Erosion (Attrition):</strong> We have provided this parameter to assume that a smaller volume of children will be affected over time as the policy becomes embedded (e.g., as families adapt, choose the nearest school, or make alternative travel arrangements). Each cohort's size is reduced by the selected <strong>Erosion Rate (${erosionRate}%)</strong> for each year they remain in the school system.
                 </li>
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 10px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
