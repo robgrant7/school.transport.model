@@ -8,10 +8,10 @@ function runDashboard() {
         observationWindow: 8, // 8 years
         vehicleCostPerDay: 125, // Taxi Cost / Day
         pupilsPerAltVehicle: 3, // Pupils per Taxi
-        minibusCostPerDay: 175,
+        minibusCostPerDay: 250,
         pupilsPerMinibus: 16,
         minibusThreshold: 8,
-        coachCostPerDay: 300,
+        coachCostPerDay: 500,
         pupilsPerCoach: 50,
         coachThreshold: 17,
         schoolDays: 190,
