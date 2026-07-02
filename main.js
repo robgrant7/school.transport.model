@@ -79,8 +79,7 @@ function runDashboard() {
 
     // Calculated read-only values in control panel
     const derivedDisplays = {
-        actualAffected: document.getElementById('val-actual-affected'),
-        vehiclesRequired: document.getElementById('val-vehicles-required')
+        actualAffected: document.getElementById('val-actual-affected')
     };
 
     const kpis = {
@@ -304,7 +303,6 @@ function runDashboard() {
 
         // Update read-only derived stats in control panel
         derivedDisplays.actualAffected.textContent = Math.round(model.actualAffected);
-        derivedDisplays.vehiclesRequired.textContent = (model.baseCohortVehicles).toFixed(1);
 
         // Update KPI panels
         const cumulative7YearSavings = finalYear.cumulativeNetSavings;
@@ -491,6 +489,10 @@ function runDashboard() {
         const optOutRate = parseFloat(inputs.optOutRate.value);
         const vehicleCostPerDay = parseFloat(inputs.vehicleCostPerDay.value);
         const pupilsPerAltVehicle = parseFloat(inputs.vehicleCapacity.value);
+        const minibusCostPerDay = parseFloat(inputs.minibusCostPerDay.value);
+        const pupilsPerMinibus = parseFloat(inputs.pupilsPerMinibus.value);
+        const coachCostPerDay = parseFloat(inputs.coachCostPerDay.value);
+        const pupilsPerCoach = parseFloat(inputs.pupilsPerCoach.value);
         const s1AppealsRate = parseFloat(inputs.s1AppealsRate.value);
         const s2AppealsRate = parseFloat(inputs.s2AppealsRate.value);
         const s3OmbudRate = parseFloat(inputs.s3OmbudRate.value);
@@ -562,6 +564,9 @@ function runDashboard() {
             <p style="margin-bottom: 20px; font-size: 0.95rem;">Below is the exact step-by-step arithmetic showing how the Year 1 figures are calculated from your current slider parameters. All calculations are rounded to the nearest pound.</p>
             
             <h3 style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 6px; margin-top: 15px; color: var(--protest-blue); font-family: var(--font-heading); font-size: 1.25rem;">Step 1: Calculate the Displaced Student Population</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; font-style: italic;">
+                <strong>Outcome Impact:</strong> This defines the core population stack. A higher child count or a lower opt-out rate directly increases the starting pupil pool, cascading into higher transportation and dispute overheads.
+            </p>
             <ul style="list-style-type: none; padding-left: 0; margin-bottom: 15px;">
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
@@ -569,7 +574,7 @@ function runDashboard() {
                 </li>
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
-                    <strong>Opt-Out Rate:</strong> ${optOutRate}% choose to travel independently or walk.
+                    <strong>Opt-Out Rate:</strong> ${optOutRate}% choose to travel independently or walk, reducing the council's direct transport obligation.
                 </li>
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
@@ -579,22 +584,25 @@ function runDashboard() {
             </ul>
 
             <h3 style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 6px; margin-top: 15px; color: var(--protest-blue); font-family: var(--font-heading); font-size: 1.25rem;">Step 2: Calculate Year 1 Transport Cost</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; font-style: italic;">
+                <strong>Outcome Impact:</strong> Models localized routing realities. Splitting children across feeder zones reduces consolidation opportunities. Isolated pupils are locked into individual taxis, while the remaining group is evaluated against minibus and coach thresholds to trigger cost-saving larger vehicles.
+            </p>
             <ul style="list-style-type: none; padding-left: 0; margin-bottom: 15px;">
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
-                    <strong>Geographic Partition:</strong> The displaced cohort is split across ${numberOfZones} rural clusters, yielding <strong style="color: var(--text-primary);">${zoneCohortPop.toFixed(2)} pupils</strong> per zone.
+                    <strong>Feeder Zones / Clusters:</strong> Cohort is split across ${numberOfZones} rural clusters, yielding <strong style="color: var(--text-primary);">${zoneCohortPop.toFixed(2)} pupils</strong> per zone.
                 </li>
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
-                    <strong>Rural Isolation:</strong> ${isolationRate}% of pupils (${isolatedPupils.toFixed(2)} per zone) require <strong style="color: var(--text-primary);">${isolatedTaxis.toFixed(2)} isolated Taxis</strong> (capacity ${pupilsPerAltVehicle}, cost: £${vehicleCostPerDay}/day).
+                    <strong>Rural Isolation Rate:</strong> ${isolationRate}% of pupils (${isolatedPupils.toFixed(2)} per zone) must travel alone in <strong style="color: var(--text-primary);">${isolatedTaxis.toFixed(2)} Taxis</strong> (capacity: ${pupilsPerAltVehicle}, cost: £${vehicleCostPerDay}/day).
                 </li>
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
-                    <strong>Consolidation Group:</strong> The remaining ${remPupils.toFixed(2)} pupils per zone are evaluated against thresholds (Minibus: ${minibusThreshold}, Coach: ${coachThreshold}). They utilize <strong style="color: var(--text-primary);">${groupText}</strong>.
+                    <strong>Consolidation Group:</strong> The remaining ${remPupils.toFixed(2)} pupils are evaluated. Thresholds: Minibus at ${minibusThreshold} (capacity: ${pupilsPerMinibus}, cost: £${minibusCostPerDay}); Coach at ${coachThreshold} (capacity: ${pupilsPerCoach}, cost: £${coachCostPerDay}). Currently utilizing: <strong style="color: var(--text-primary);">${groupText}</strong>.
                 </li>
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
-                    <strong>Total Vehicles:</strong> across all ${numberOfZones} zones, we require <strong style="color: var(--text-primary);">${baseCohortVehicles.toFixed(1)} vehicles</strong>.
+                    <strong>Total Year 1 Vehicles:</strong> across all ${numberOfZones} zones, we require <strong style="color: var(--text-primary);">${baseCohortVehicles.toFixed(1)} vehicles</strong>.
                 </li>
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
@@ -603,6 +611,9 @@ function runDashboard() {
             </ul>
 
             <h3 style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 6px; margin-top: 15px; color: var(--protest-blue); font-family: var(--font-heading); font-size: 1.25rem;">Step 3: Calculate Dispute Overhead</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; font-style: italic;">
+                <strong>Outcome Impact:</strong> Models the appellate funnel. High Stage 1, Stage 2, and Stage 3 Ombudsman transition rates push more families into disputes, while high unit admin costs generate significant short-term administrative cash penalties for the council.
+            </p>
             <ul style="list-style-type: none; padding-left: 0; margin-bottom: 15px;">
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
@@ -624,6 +635,9 @@ function runDashboard() {
             </ul>
 
             <h3 style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 6px; margin-top: 15px; color: var(--protest-blue); font-family: var(--font-heading); font-size: 1.25rem;">Step 4: Year 1 Consolidation</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; font-style: italic;">
+                <strong>Outcome Impact:</strong> Combines vehicle, dispute, and ongoing administration costs (£${ongoingAdminCost}/year). Compares this total to the phased claimed savings (Year 1 is 19.72% of the Year 8 maturity claim) to calculate the final Year 1 balance.
+            </p>
             <ul style="list-style-type: none; padding-left: 0; margin-bottom: 15px;">
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
@@ -636,14 +650,14 @@ function runDashboard() {
                 </li>
                 <li style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; padding-left: 15px; position: relative;">
                     <span style="position: absolute; left: 0; color: var(--protest-pink); font-size: 8px; top: 4px;">■</span>
-                    <strong>Phased Claimed Savings:</strong> <strong style="color: var(--text-primary);">${formatGBP(phasedSavingsY1)}</strong> (Year 1 share of the 8-year savings claim).<br>
+                    <strong>Phased Claimed Savings:</strong> <strong style="color: var(--text-primary);">${formatGBP(phasedSavingsY1)}</strong> (Year 1 share of the £${(councilSavingsClaim).toLocaleString()} maturity claim).<br>
                     <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">Formula: £${(councilSavingsClaim).toLocaleString()} × 19.72% (Year 1 Phasing Weight) = ${formatGBP(phasedSavingsY1)}</span>
                 </li>
                 <li style="margin-top: 20px; font-size: 1.05rem; padding: 15px; background: rgba(255,42,133,0.06); border-left: 3px solid ${netY1 < 0 ? 'var(--protest-pink)' : 'var(--protest-green)'}; border-radius: 0 4px 4px 0;">
                     <strong style="color: var(--text-primary);">Year 1 Year-End Net Balance:</strong> <strong class="${netY1 < 0 ? 'deficit-text' : 'savings-text'}">${formatGBP(netY1)}</strong>.<br>
                     <span style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px; display: block; line-height: 1.45;">
                         ${netY1 < 0 
-                            ? `🚨 In Year 1, alternative vehicle and dispute costs exceed phased savings, resulting in a net deficit of <strong>${formatGBP(Math.abs(netY1))}</strong>.` 
+                            ? `🚨 In Year 1, alternative vehicle, dispute, and admin costs exceed phased savings, resulting in a net deficit of <strong>${formatGBP(Math.abs(netY1))}</strong>.` 
                             : `✅ In Year 1, the policy generates a net surplus of <strong>${formatGBP(netY1)}</strong>.`
                         }
                     </span>
