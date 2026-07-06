@@ -1160,6 +1160,480 @@ function runDashboard() {
             document.getElementById(`tab-panel-${targetTab}`).classList.add('active');
         });
     });
+    let plainTextTrace = "";
+
+    function updateTraceModalContent() {
+        // Read DOM inputs
+        const childrenAffected = parseFloat(inputs.childrenAffected.value);
+        const optOutRate = parseFloat(inputs.optOutRate.value) / 100;
+        const vehicleCostPerDay = parseFloat(inputs.vehicleCostPerDay.value);
+        const pupilsPerAltVehicle = parseFloat(inputs.vehicleCapacity.value);
+        const minibusCostPerDay = parseFloat(inputs.minibusCostPerDay.value);
+        const pupilsPerMinibus = parseFloat(inputs.pupilsPerMinibus.value);
+        const minibusThreshold = parseFloat(inputs.minibusThreshold.value);
+        const coachCostPerDay = parseFloat(inputs.coachCostPerDay.value);
+        const pupilsPerCoach = parseFloat(inputs.pupilsPerCoach.value);
+        const coachThreshold = parseFloat(inputs.coachThreshold.value);
+        const s1AppealsRate = parseFloat(inputs.s1AppealsRate.value) / 100;
+        const s2AppealsRate = parseFloat(inputs.s2AppealsRate.value) / 100;
+        const s3OmbudRate = parseFloat(inputs.s3OmbudRate.value) / 100;
+        const ongoingAdminCost = parseFloat(inputs.ongoingAdminCost.value);
+        const councilSavingsClaim = parseFloat(inputs.councilSavingsClaim.value);
+        const numberOfZones = parseFloat(inputs.numberOfZones.value);
+        const isolationRate = parseFloat(inputs.isolationRate.value) / 100;
+
+        const schoolDays = defaults.schoolDays;
+        const schoolCareer = defaults.schoolCareer;
+        const s1Cost = parseFloat(inputs.s1Cost.value);
+        const s2Cost = parseFloat(inputs.s2Cost.value);
+        const s3Cost = parseFloat(inputs.s3Cost.value);
+
+        // Run calculation variables
+        const actualAffected = Math.round(childrenAffected * (1 - optOutRate) * 100) / 100;
+        
+        // Year 1 detailed splits
+        const zoneCohortPop = actualAffected / numberOfZones;
+        const isolatedPupils = zoneCohortPop * isolationRate;
+        const isolatedTaxis = isolatedPupils / pupilsPerAltVehicle;
+        const remPupils = zoneCohortPop - isolatedPupils;
+        
+        let groupTaxis = 0;
+        let groupMinibuses = 0;
+        let groupCoaches = 0;
+        let vehicleTypeUsed = "";
+        let groupMathText = "";
+        
+        if (remPupils < minibusThreshold) {
+            groupTaxis = remPupils / pupilsPerAltVehicle;
+            vehicleTypeUsed = "Taxi";
+            groupMathText = `Remaining pupils (${remPupils.toFixed(2)}) is less than Minibus Threshold (${minibusThreshold}), utilizing Taxis (capacity: ${pupilsPerAltVehicle}, cost: £${vehicleCostPerDay}/day).<br>` +
+                            `Formula: Remaining Pupils (${remPupils.toFixed(2)}) / Taxi Capacity (${pupilsPerAltVehicle}) = ${groupTaxis.toFixed(2)} group taxis per zone.`;
+        } else if (remPupils < coachThreshold) {
+            groupMinibuses = remPupils / pupilsPerMinibus;
+            vehicleTypeUsed = "Minibus";
+            groupMathText = `Remaining pupils (${remPupils.toFixed(2)}) is greater than or equal to Minibus Threshold (${minibusThreshold}) but less than Coach Threshold (${coachThreshold}), utilizing Minibuses (capacity: ${pupilsPerMinibus}, cost: £${minibusCostPerDay}/day).<br>` +
+                            `Formula: Remaining Pupils (${remPupils.toFixed(2)}) / Minibus Capacity (${pupilsPerMinibus}) = ${groupMinibuses.toFixed(2)} group minibuses per zone.`;
+        } else {
+            groupCoaches = remPupils / pupilsPerCoach;
+            vehicleTypeUsed = "Coach";
+            groupMathText = `Remaining pupils (${remPupils.toFixed(2)}) is greater than or equal to Coach Threshold (${coachThreshold}), utilizing Coaches (capacity: ${pupilsPerCoach}, cost: £${coachCostPerDay}/day).<br>` +
+                            `Formula: Remaining Pupils (${remPupils.toFixed(2)}) / Coach Capacity (${pupilsPerCoach}) = ${groupCoaches.toFixed(2)} group coaches per zone.`;
+        }
+
+        const taxisPerZone = isolatedTaxis + groupTaxis;
+        const minibusesPerZone = groupMinibuses;
+        const coachesPerZone = groupCoaches;
+
+        const zoneCostPerDay = (taxisPerZone * vehicleCostPerDay) + 
+                               (minibusesPerZone * minibusCostPerDay) + 
+                               (coachesPerZone * coachCostPerDay);
+        const totalDailyCost = zoneCostPerDay * numberOfZones;
+        const annualVehicleCost = totalDailyCost * schoolDays;
+
+        // Appeals Year 1
+        const s1Count = actualAffected * s1AppealsRate;
+        const s2Count = s1Count * s2AppealsRate;
+        const s3Count = s2Count * s3OmbudRate;
+
+        const costS1 = s1Count * s1Cost;
+        const costS2 = s2Count * s2Cost;
+        const costS3 = s3Count * s3Cost;
+        const totalAppealsCost = costS1 + costS2 + costS3;
+
+        // Year 1 Total
+        const totalCostY1 = annualVehicleCost + totalAppealsCost + ongoingAdminCost;
+        
+        // Phased Council Savings weights
+        const savingsPhasingWeights = [
+            840800 / 4263445,
+            1594191 / 4263445,
+            2390050 / 4263445,
+            3146036 / 4263445,
+            3586200 / 4263445,
+            4026363 / 4263445,
+            4133978 / 4263445,
+            1.0
+        ];
+        const phasedSavingsY1 = councilSavingsClaim * savingsPhasingWeights[0];
+        const netY1 = phasedSavingsY1 - totalCostY1;
+
+        // 8-Year Loop data
+        let cumulativeVehicle = 0;
+        let cumulativeAppealsTotal = 0;
+        let cumulativeAdmin = 0;
+        let cumulativeCouncilSavings = 0;
+        const yearsTraceData = [];
+
+        for (let t = 1; t <= 8; t++) {
+            let zonePop = 0;
+            for (let age = 1; age <= Math.min(t, schoolCareer); age++) {
+                zonePop += actualAffected / numberOfZones;
+            }
+            const tIsolatedPupils = zonePop * isolationRate;
+            const tIsolatedTaxis = tIsolatedPupils / pupilsPerAltVehicle;
+            const tRemPupils = zonePop - tIsolatedPupils;
+            
+            let tGroupTaxis = 0;
+            let tGroupMinibuses = 0;
+            let tGroupCoaches = 0;
+            if (tRemPupils < minibusThreshold) {
+                tGroupTaxis = tRemPupils / pupilsPerAltVehicle;
+            } else if (tRemPupils < coachThreshold) {
+                tGroupMinibuses = tRemPupils / pupilsPerMinibus;
+            } else {
+                tGroupCoaches = tRemPupils / pupilsPerCoach;
+            }
+            const tLayerCostPerZone = (tIsolatedTaxis + tGroupTaxis) * vehicleCostPerDay + 
+                                     tGroupMinibuses * minibusCostPerDay +
+                                     tGroupCoaches * coachCostPerDay;
+            const tSpotVehicle = tLayerCostPerZone * numberOfZones * schoolDays;
+            cumulativeVehicle += tSpotVehicle;
+
+            const tS1Count = actualAffected * s1AppealsRate;
+            const tS2Count = tS1Count * s2AppealsRate;
+            const tS3Count = tS2Count * s3OmbudRate;
+
+            const tSpotAppeals = (tS1Count * s1Cost) + (tS2Count * s2Cost) + (tS3Count * s3Cost);
+            cumulativeAppealsTotal += tSpotAppeals;
+
+            const tSpotAdmin = ongoingAdminCost;
+            cumulativeAdmin += tSpotAdmin;
+
+            const tSpotCouncilSavings = councilSavingsClaim * savingsPhasingWeights[t - 1];
+            cumulativeCouncilSavings += tSpotCouncilSavings;
+
+            const tSpotTotal = tSpotVehicle + tSpotAppeals + tSpotAdmin;
+            const tCumulativeTotal = cumulativeVehicle + cumulativeAppealsTotal + cumulativeAdmin;
+
+            const tSpotNetSavings = tSpotCouncilSavings - tSpotTotal;
+            const tCumulativeNetSavings = cumulativeCouncilSavings - tCumulativeTotal;
+
+            yearsTraceData.push({
+                year: t,
+                activeCohorts: Math.min(t, schoolCareer),
+                spotVehicle: tSpotVehicle,
+                cumulativeVehicle,
+                spotAppeals: tSpotAppeals,
+                cumulativeAppeals: cumulativeAppealsTotal,
+                spotAdmin: tSpotAdmin,
+                cumulativeAdmin,
+                spotTotal: tSpotTotal,
+                cumulativeTotal: tCumulativeTotal,
+                spotSavings: tSpotCouncilSavings,
+                cumulativeSavings: cumulativeCouncilSavings,
+                spotNet: tSpotNetSavings,
+                cumulativeNet: tCumulativeNetSavings
+            });
+        }
+
+        const finalYear = yearsTraceData[7];
+
+        // Format HTML
+        const bodyElement = document.getElementById('modal-trace-body');
+        if (bodyElement) {
+            bodyElement.innerHTML = `
+                <p style="font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5; color: var(--text-secondary);">
+                    This diagnostic trace presents the detailed step-by-step arithmetic and logic sequence underlying the financial dashboard. Change slider parameters to instantly recalculate and observe the mathematical progression.
+                </p>
+
+                <!-- Active inputs overview -->
+                <div class="trace-step">
+                    <h3>1. Active Model Parameters (Current State)</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 0.85rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 12px; border-radius: 4px;">
+                        <div><strong>Children Affected:</strong> ${childrenAffected.toLocaleString()}</div>
+                        <div><strong>Opt-Out Rate:</strong> ${(optOutRate * 100).toFixed(0)}%</div>
+                        <div><strong>Actual Affected:</strong> ${actualAffected.toFixed(2)}</div>
+                        <div><strong>Feeder Zones / Clusters:</strong> ${numberOfZones}</div>
+                        <div><strong>Isolation Rate:</strong> ${(isolationRate * 100).toFixed(0)}%</div>
+                        <div><strong>Taxi Cost/Day:</strong> ${formatGBP(vehicleCostPerDay)} (cap: ${pupilsPerAltVehicle})</div>
+                        <div><strong>Minibus Cost/Day:</strong> ${formatGBP(minibusCostPerDay)} (cap: ${pupilsPerMinibus})</div>
+                        <div><strong>Minibus Threshold:</strong> ${minibusThreshold}</div>
+                        <div><strong>Coach Cost/Day:</strong> ${formatGBP(coachCostPerDay)} (cap: ${pupilsPerCoach})</div>
+                        <div><strong>Coach Threshold:</strong> ${coachThreshold}</div>
+                        <div><strong>Stage 1 Appeal Cost:</strong> ${formatGBP(s1Cost)} (rate: ${(s1AppealsRate * 100).toFixed(0)}%)</div>
+                        <div><strong>Stage 2 Appeal Cost:</strong> ${formatGBP(s2Cost)} (rate: ${(s2AppealsRate * 100).toFixed(0)}%)</div>
+                        <div><strong>Stage 3 Appeal Cost:</strong> ${formatGBP(s3Cost)} (rate: ${(s3OmbudRate * 100).toFixed(0)}%)</div>
+                        <div><strong>Annual Admin Cost:</strong> ${formatGBP(ongoingAdminCost)}</div>
+                        <div><strong>Council Savings Claim:</strong> ${formatGBP(councilSavingsClaim)}</div>
+                        <div><strong>School Days / Year:</strong> ${schoolDays}</div>
+                    </div>
+                </div>
+
+                <!-- Step 1: Affected children -->
+                <div class="trace-step">
+                    <h3>2. Net Children Requiring Transport</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                        Calculates the actual number of children who will receive council transport support, after subtracting the families who opt out and arrange their own travel.
+                    </p>
+                    <div class="formula-box">
+                        Actual Affected Pupils = Children Affected &times; (100% - Opt-Out Rate)<br>
+                        Actual Affected Pupils = ${childrenAffected.toLocaleString()} &times; (100% - ${(optOutRate * 100).toFixed(0)}%) = ${actualAffected.toFixed(2)} pupils
+                    </div>
+                </div>
+
+                <!-- Step 2: Geographic partition & vehicle math -->
+                <div class="trace-step">
+                    <h3>3. Route Fracturing &amp; Alternative Vehicle Allocations (Year 1)</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                        Because catchment transport is cut, children are divided across separate feeder communities (Zones). We model the vehicle requirements of a single zone and multiply by the total number of zones.
+                    </p>
+                    <ul style="list-style-type: none; padding-left: 0; font-size: 0.85rem;">
+                        <li style="margin-bottom: 6px; padding-left: 12px; position: relative;">
+                            <span style="position: absolute; left: 0; color: var(--protest-pink);">■</span>
+                            <strong>Pupils per Zone:</strong> ${actualAffected.toFixed(2)} / ${numberOfZones} zones = ${zoneCohortPop.toFixed(4)} pupils per zone.
+                        </li>
+                        <li style="margin-bottom: 6px; padding-left: 12px; position: relative;">
+                            <span style="position: absolute; left: 0; color: var(--protest-pink);">■</span>
+                            <strong>Isolated pupils (Taxi-reliant):</strong> ${zoneCohortPop.toFixed(4)} pupils/zone &times; ${(isolationRate * 100).toFixed(0)}% isolation rate = ${isolatedPupils.toFixed(4)} isolated pupils/zone.<br>
+                            These pupils cannot share routes due to remote locations and require Taxis (capacity: ${pupilsPerAltVehicle}).<br>
+                            Isolated Taxis = ${isolatedPupils.toFixed(4)} pupils / ${pupilsPerAltVehicle} capacity = <strong>${isolatedTaxis.toFixed(4)} Taxis per zone</strong>.
+                        </li>
+                        <li style="margin-bottom: 6px; padding-left: 12px; position: relative;">
+                            <span style="position: absolute; left: 0; color: var(--protest-pink);">■</span>
+                            <strong>Remaining pupils (Eligible for Group Transport):</strong> ${zoneCohortPop.toFixed(4)} - ${isolatedPupils.toFixed(4)} = ${remPupils.toFixed(4)} pupils per zone.
+                        </li>
+                        <li style="margin-bottom: 6px; padding-left: 12px; position: relative;">
+                            <span style="position: absolute; left: 0; color: var(--protest-pink);">■</span>
+                            <strong>Group Vehicle Selection:</strong><br>
+                            <span style="color: var(--text-primary); font-family: monospace; display: block; margin-top: 4px; padding-left: 10px; border-left: 2px solid var(--border-color);">${groupMathText}</span>
+                        </li>
+                        <li style="margin-top: 10px; margin-bottom: 6px; padding-left: 12px; position: relative;">
+                            <span style="position: absolute; left: 0; color: var(--protest-blue);">■</span>
+                            <strong>Total Vehicles per Zone:</strong> ${isolatedTaxis.toFixed(4)} isolated taxis + ${groupTaxis.toFixed(4)} group taxis + ${groupMinibuses.toFixed(4)} group minibuses + ${groupCoaches.toFixed(4)} group coaches = <strong>${(taxisPerZone + minibusesPerZone + coachesPerZone).toFixed(4)} vehicles per zone</strong>.
+                        </li>
+                    </ul>
+                    <div class="formula-box">
+                        Daily Cost per Zone = (Taxis per Zone &times; Taxi Cost/Day) + (Minibuses per Zone &times; Minibus Cost/Day) + (Coaches per Zone &times; Coach Cost/Day)<br>
+                        Daily Cost per Zone = (${taxisPerZone.toFixed(4)} &times; £${vehicleCostPerDay}) + (${minibusesPerZone.toFixed(4)} &times; £${minibusCostPerDay}) + (${coachesPerZone.toFixed(4)} &times; £${coachCostPerDay}) = ${formatGBP(zoneCostPerDay)} per zone/day
+                    </div>
+                    <div class="formula-box">
+                        Total Daily Cost (All Zones) = Daily Cost per Zone &times; Number of Zones<br>
+                        Total Daily Cost = ${formatGBP(zoneCostPerDay)} &times; ${numberOfZones} = ${formatGBP(totalDailyCost)} per day
+                    </div>
+                    <div class="formula-box">
+                        Annual Transport Cost = Total Daily Cost &times; School Days/Year<br>
+                        Annual Transport Cost = ${formatGBP(totalDailyCost)} &times; ${schoolDays} = ${formatGBP(annualVehicleCost)}
+                    </div>
+                </div>
+
+                <!-- Step 3: Appeals -->
+                <div class="trace-step">
+                    <h3>4. Dispute Resolution / Appeals Progression Pipeline (Year 1 Intake)</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                        Cutting transport eligibility triggers a structured appellate pipeline. Unit costs are applied to children entering the system each year.
+                    </p>
+                    <ul style="list-style-type: none; padding-left: 0; font-size: 0.85rem;">
+                        <li style="margin-bottom: 6px; padding-left: 12px; position: relative;">
+                            <span style="position: absolute; left: 0; color: var(--protest-pink);">■</span>
+                            <strong>Stage 1 (Internal Review):</strong> ${actualAffected.toFixed(2)} intake pupils &times; ${(s1AppealsRate * 100).toFixed(0)}% = ${s1Count.toFixed(2)} appeals.<br>
+                            Cost: ${s1Count.toFixed(2)} appeals &times; ${formatGBP(s1Cost)} unit cost = <strong>${formatGBP(costS1)}</strong>.
+                        </li>
+                        <li style="margin-bottom: 6px; padding-left: 12px; position: relative;">
+                            <span style="position: absolute; left: 0; color: var(--protest-pink);">■</span>
+                            <strong>Stage 2 (Independent Panel Hearing):</strong> ${s1Count.toFixed(2)} Stage 1 appeals &times; ${(s2AppealsRate * 100).toFixed(0)}% escalation = ${s2Count.toFixed(2)} panels.<br>
+                            Cost: ${s2Count.toFixed(2)} hearings &times; ${formatGBP(s2Cost)} unit cost = <strong>${formatGBP(costS2)}</strong>.
+                        </li>
+                        <li style="margin-bottom: 6px; padding-left: 12px; position: relative;">
+                            <span style="position: absolute; left: 0; color: var(--protest-pink);">■</span>
+                            <strong>Stage 3 (Ombudsman Review):</strong> ${s2Count.toFixed(2)} Stage 2 panels &times; ${(s3OmbudRate * 100).toFixed(0)}% escalation = ${s3Count.toFixed(2)} investigations.<br>
+                            Cost: ${s3Count.toFixed(2)} cases &times; ${formatGBP(s3Cost)} unit cost = <strong>${formatGBP(costS3)}</strong>.
+                        </li>
+                    </ul>
+                    <div class="formula-box">
+                        Total Annual Appeal Cost = Stage 1 Cost + Stage 2 Cost + Stage 3 Cost<br>
+                        Total Annual Appeal Cost = ${formatGBP(costS1)} + ${formatGBP(costS2)} + ${formatGBP(costS3)} = ${formatGBP(totalAppealsCost)}
+                    </div>
+                </div>
+
+                <!-- Step 4: Year 1 Summary -->
+                <div class="trace-step">
+                    <h3>5. Year 1 Final Fiscal Summary</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                        Sums all operational, dispute, and general admin costs for the first implementation year, contrasting it with the Council's phased savings target (19.72% weight).
+                    </p>
+                    <div class="formula-box">
+                        Total Year 1 Actual Cost = Transport (${formatGBP(annualVehicleCost)}) + Appeals (${formatGBP(totalAppealsCost)}) + Admin (${formatGBP(ongoingAdminCost)}) = ${formatGBP(totalCostY1)}
+                    </div>
+                    <div class="formula-box">
+                        Phased Savings Target = Target Savings (${formatGBP(councilSavingsClaim)}) &times; Year 1 Weight (19.72%) = ${formatGBP(phasedSavingsY1)}
+                    </div>
+                    
+                    <div class="trace-highlight-box ${netY1 >= 0 ? 'success' : ''}">
+                        <strong>Year 1 Net Balance:</strong> ${formatGBP(phasedSavingsY1)} (Savings) - ${formatGBP(totalCostY1)} (Cost) = <strong style="text-decoration: underline;">${formatGBP(netY1)}</strong><br>
+                        <span style="font-size: 0.8rem; margin-top: 5px; display: block;">
+                            ${netY1 < 0 
+                                ? `🚨 Deficit: Costs exceed claimed savings by <strong>${formatGBP(Math.abs(netY1))}</strong> in the first year.` 
+                                : `✅ Surplus: Policy yields a net gain of <strong>${formatGBP(netY1)}</strong> in the first year.`
+                            }
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Step 5: Cohort Accumulation & 8-Year Progression -->
+                <div class="trace-step">
+                    <h3>6. Cohort Accumulation &amp; 8-Year Totals</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px;">
+                        The model stack builds up for 5 years (representing pupils' 5-year school careers). From Year 5 onwards, the school corridors reach steady-state density, and vehicles are consolidated dynamically.
+                    </p>
+                    <div class="table-wrapper">
+                        <table class="trace-table-summary">
+                            <thead>
+                                <tr>
+                                    <th>Year</th>
+                                    <th>Cohorts</th>
+                                    <th>Vehicle Cost</th>
+                                    <th>Appeals</th>
+                                    <th>Admin</th>
+                                    <th>Total Cost</th>
+                                    <th>Claimed Savings</th>
+                                    <th>Net Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${yearsTraceData.map(y => `
+                                    <tr style="${y.year === 8 ? 'background-color: rgba(255, 42, 133, 0.08); font-weight: bold;' : ''}">
+                                        <td>Year ${y.year}</td>
+                                        <td>${y.activeCohorts}</td>
+                                        <td>${formatGBP(y.spotVehicle)}</td>
+                                        <td>${formatGBP(y.spotAppeals)}</td>
+                                        <td>${formatGBP(y.spotAdmin)}</td>
+                                        <td>${formatGBP(y.spotTotal)}</td>
+                                        <td>${formatGBP(y.spotSavings)}</td>
+                                        <td class="${y.spotNet < 0 ? 'deficit-text' : 'savings-text'}">${formatGBP(y.spotNet)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <h3>8-Year Cumulative Sums:</h3>
+                        <div style="font-size: 0.85rem; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 4px; line-height: 1.6;">
+                            <div>• <strong>Cumulative Transport Cost (8 Yrs):</strong> ${formatGBP(finalYear.cumulativeVehicle)}</div>
+                            <div>• <strong>Cumulative Appeals Cost (8 Yrs):</strong> ${formatGBP(finalYear.cumulativeAppeals)}</div>
+                            <div>• <strong>Cumulative Admin Cost (8 Yrs):</strong> ${formatGBP(finalYear.cumulativeAdmin)}</div>
+                            <div style="border-bottom: 1px dashed rgba(255,255,255,0.1); margin: 6px 0;"></div>
+                            <div>• <strong>Total STAG Projected Cost:</strong> ${formatGBP(finalYear.cumulativeVehicle)} + ${formatGBP(finalYear.cumulativeAppeals)} + ${formatGBP(finalYear.cumulativeAdmin)} = <strong>${formatGBP(finalYear.cumulativeTotal)}</strong></div>
+                            <div>• <strong>Total Council Claimed Savings:</strong> <strong>${formatGBP(finalYear.cumulativeSavings)}</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="trace-highlight-box ${finalYear.cumulativeNet >= 0 ? 'success' : ''}" style="margin-top: 15px;">
+                        <strong>8-Year Net Cumulative Balance:</strong> ${formatGBP(finalYear.cumulativeSavings)} (Savings) - ${formatGBP(finalYear.cumulativeTotal)} (Costs) = <strong style="text-decoration: underline; font-size: 1.1rem;">${formatGBP(finalYear.cumulativeNet)}</strong><br>
+                        <span style="font-size: 0.85rem; margin-top: 5px; display: block;">
+                            ${finalYear.cumulativeNet < 0 
+                                ? `🚨 Fiscal Verdict: The policy is a NET LOSER over 8 years, draining NYC accounts by <strong>${formatGBP(Math.abs(finalYear.cumulativeNet))}</strong>.` 
+                                : `✅ Fiscal Verdict: The policy is a NET GAINER over 8 years, yielding <strong>${formatGBP(finalYear.cumulativeNet)}</strong>.`
+                            }
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate Plain Text version for copy-paste
+        plainTextTrace = 
+`================================================================================
+                           CALCULATION AUDIT TRACE
+================================================================================
+Generated: ${new Date().toLocaleString('en-GB')}
+This audit trail shows exactly how the current input parameters calculate the 
+final financial results. Zero hidden variables.
+
+--------------------------------------------------------------------------------
+1. ACTIVE MODEL PARAMETERS
+--------------------------------------------------------------------------------
+- Children Affected: ${childrenAffected.toLocaleString()}
+- Opt-Out Rate: ${(optOutRate * 100).toFixed(0)}%
+- Actual Affected: ${actualAffected.toFixed(2)}
+- Feeder Zones / Clusters: ${numberOfZones}
+- Isolation Rate: ${(isolationRate * 100).toFixed(0)}%
+- Taxi Cost/Day: ${formatGBP(vehicleCostPerDay)} (capacity: ${pupilsPerAltVehicle})
+- Minibus Cost/Day: ${formatGBP(minibusCostPerDay)} (capacity: ${pupilsPerMinibus})
+- Minibus Threshold: ${minibusThreshold}
+- Coach Cost/Day: ${formatGBP(coachCostPerDay)} (capacity: ${pupilsPerCoach})
+- Coach Threshold: ${coachThreshold}
+- Stage 1 Appeal Cost: ${formatGBP(s1Cost)} (rate: ${(s1AppealsRate * 100).toFixed(0)}%)
+- Stage 2 Appeal Cost: ${formatGBP(s2Cost)} (rate: ${(s2AppealsRate * 100).toFixed(0)}%)
+- Stage 3 Appeal Cost: ${formatGBP(s3Cost)} (rate: ${(s3OmbudRate * 100).toFixed(0)}%)
+- Annual Admin Cost: ${formatGBP(ongoingAdminCost)}
+- Council Savings Claim: ${formatGBP(councilSavingsClaim)}
+- School Days / Year: ${schoolDays}
+
+--------------------------------------------------------------------------------
+2. NET CHILDREN REQUIRING TRANSPORT
+--------------------------------------------------------------------------------
+Formula:
+  Actual Affected Pupils = Children Affected * (100% - Opt-Out Rate)
+Calculation:
+  ${childrenAffected.toLocaleString()} * (100% - ${(optOutRate * 100).toFixed(0)}%) = ${actualAffected.toFixed(2)} pupils
+
+--------------------------------------------------------------------------------
+3. ROUTE FRACTURING & VEHICLE ALLOCATIONS (YEAR 1)
+--------------------------------------------------------------------------------
+- Pupils per Zone: ${actualAffected.toFixed(2)} / ${numberOfZones} = ${zoneCohortPop.toFixed(4)} pupils/zone
+- Isolated pupils/zone (Taxi-reliant): ${zoneCohortPop.toFixed(4)} * ${(isolationRate * 100).toFixed(0)}% = ${isolatedPupils.toFixed(4)} pupils/zone
+- Isolated Taxis required/zone: ${isolatedPupils.toFixed(4)} / ${pupilsPerAltVehicle} = ${isolatedTaxis.toFixed(4)} Taxis/zone
+- Remaining pupils/zone: ${zoneCohortPop.toFixed(4)} - ${isolatedPupils.toFixed(4)} = ${remPupils.toFixed(4)} pupils/zone
+- Group Vehicle Selection:
+  ${groupMathText.replace(/<br>/g, '\n  ')}
+- Total Vehicles/Zone:
+  - Taxis: ${taxisPerZone.toFixed(4)}
+  - Minibuses: ${minibusesPerZone.toFixed(4)}
+  - Coaches: ${coachesPerZone.toFixed(4)}
+  - Total: ${(taxisPerZone + minibusesPerZone + coachesPerZone).toFixed(4)} vehicles/zone
+
+Formulas:
+  Daily Cost per Zone = (${taxisPerZone.toFixed(4)} Taxis * £${vehicleCostPerDay}) + (${minibusesPerZone.toFixed(4)} Minibuses * £${minibusCostPerDay}) + (${coachesPerZone.toFixed(4)} Coaches * £${coachCostPerDay}) = ${formatGBP(zoneCostPerDay)}
+  Total Daily Cost (All Zones) = ${formatGBP(zoneCostPerDay)} * ${numberOfZones} zones = ${formatGBP(totalDailyCost)} per day
+  Annual Transport Cost = ${formatGBP(totalDailyCost)} * ${schoolDays} days = ${formatGBP(annualVehicleCost)}
+
+--------------------------------------------------------------------------------
+4. DISPUTE RESOLUTION / APPEALS PROGRESSION (YEAR 1 INTAKE)
+--------------------------------------------------------------------------------
+- Stage 1: ${actualAffected.toFixed(2)} pupils * ${(s1AppealsRate * 100).toFixed(0)}% = ${s1Count.toFixed(2)} reviews. Cost: ${s1Count.toFixed(2)} * ${formatGBP(s1Cost)} = ${formatGBP(costS1)}
+- Stage 2: ${s1Count.toFixed(2)} Stage 1 * ${(s2AppealsRate * 100).toFixed(0)}% = ${s2Count.toFixed(2)} panels. Cost: ${s2Count.toFixed(2)} * ${formatGBP(s2Cost)} = ${formatGBP(costS2)}
+- Stage 3: ${s2Count.toFixed(2)} Stage 2 * ${(s3OmbudRate * 100).toFixed(0)}% = ${s3Count.toFixed(2)} LGSCO cases. Cost: ${s3Count.toFixed(2)} * ${formatGBP(s3Cost)} = ${formatGBP(costS3)}
+
+Formula:
+  Total Year 1 Appeal Cost = Stage 1 (${formatGBP(costS1)}) + Stage 2 (${formatGBP(costS2)}) + Stage 3 (${formatGBP(costS3)}) = ${formatGBP(totalAppealsCost)}
+
+--------------------------------------------------------------------------------
+5. YEAR 1 FINAL FISCAL SUMMARY
+--------------------------------------------------------------------------------
+- Annual Transport Cost: ${formatGBP(annualVehicleCost)}
+- Annual Appeals Cost: ${formatGBP(totalAppealsCost)}
+- General Administration Cost: ${formatGBP(ongoingAdminCost)}
+- Total Year 1 Cost: ${formatGBP(totalCostY1)}
+- Council Phased Savings: ${formatGBP(phasedSavingsY1)} (19.72% of Year 8 Claim)
+
+Net Year 1 Balance:
+  Savings (${formatGBP(phasedSavingsY1)}) - Costs (${formatGBP(totalCostY1)}) = ${formatGBP(netY1)}
+  (${netY1 < 0 ? 'Deficit' : 'Surplus'})
+
+--------------------------------------------------------------------------------
+6. COHORT PROGRESSION TABLE & 8-YEAR TOTALS
+--------------------------------------------------------------------------------
+Year     Cohorts   Vehicle Cost    Appeals        Admin       Total Cost    Claimed Savings   Net Balance
+--------------------------------------------------------------------------------
+${yearsTraceData.map(y => 
+`Year ${y.year}    ${y.activeCohorts}        ${formatGBP(y.spotVehicle).padEnd(14)}  ${formatGBP(y.spotAppeals).padEnd(12)}  ${formatGBP(y.spotAdmin).padEnd(10)}  ${formatGBP(y.spotTotal).padEnd(12)}  ${formatGBP(y.spotSavings).padEnd(16)}  ${formatGBP(y.spotNet)}`
+).join('\n')}
+--------------------------------------------------------------------------------
+
+8-Year Cumulative Sums:
+- Cumulative Transport Cost: ${formatGBP(finalYear.cumulativeVehicle)}
+- Cumulative Appeals Cost: ${formatGBP(finalYear.cumulativeAppeals)}
+- Cumulative Admin Cost: ${formatGBP(finalYear.cumulativeAdmin)}
+- Total STAG Projected Cost: ${formatGBP(finalYear.cumulativeTotal)}
+- Total Council Claimed Savings: ${formatGBP(finalYear.cumulativeSavings)}
+
+8-Year Net Cumulative Balance:
+  Total Savings (${formatGBP(finalYear.cumulativeSavings)}) - Total Costs (${formatGBP(finalYear.cumulativeTotal)}) = ${formatGBP(finalYear.cumulativeNet)}
+  Verdict: ${finalYear.cumulativeNet < 0 ? 'BAD POLICY DECISION (Costs Exceed Savings)' : 'GOOD POLICY DECISION (Savings Exceed Costs)'}
+================================================================================
+`;
+    }
 
     // -------------------------------------------------------------
     // Initial Load
@@ -1187,6 +1661,11 @@ function runDashboard() {
     const btnYear1Glance = document.getElementById('btn-year1-glance');
     const closeBtnY1 = document.getElementById('modal-year1-close-btn');
 
+    const modalTrace = document.getElementById('modal-trace');
+    const btnRunTrace = document.getElementById('btn-run-trace');
+    const closeBtnTrace = document.getElementById('modal-trace-close-btn');
+    const btnCopyTrace = document.getElementById('btn-copy-trace');
+
     if (btnHowItWorks && modal && closeBtn) {
         btnHowItWorks.addEventListener('click', () => {
             modal.style.display = 'flex';
@@ -1204,6 +1683,36 @@ function runDashboard() {
 
         closeBtnY1.addEventListener('click', () => {
             modalY1.style.display = 'none';
+        });
+    }
+
+    if (btnRunTrace && modalTrace && closeBtnTrace) {
+        btnRunTrace.addEventListener('click', () => {
+            updateTraceModalContent();
+            modalTrace.style.display = 'flex';
+        });
+
+        closeBtnTrace.addEventListener('click', () => {
+            modalTrace.style.display = 'none';
+        });
+    }
+
+    if (btnCopyTrace) {
+        btnCopyTrace.addEventListener('click', () => {
+            navigator.clipboard.writeText(plainTextTrace).then(() => {
+                const originalText = btnCopyTrace.textContent;
+                btnCopyTrace.textContent = "Copied!";
+                btnCopyTrace.style.backgroundColor = "var(--protest-green)";
+                btnCopyTrace.style.color = "#000000";
+                setTimeout(() => {
+                    btnCopyTrace.textContent = originalText;
+                    btnCopyTrace.style.backgroundColor = "";
+                    btnCopyTrace.style.color = "";
+                }, 2000);
+            }).catch(err => {
+                console.error("Failed to copy text: ", err);
+                alert("Could not copy trace to clipboard. Please copy it manually.");
+            });
         });
     }
 
@@ -1232,6 +1741,9 @@ function runDashboard() {
         }
         if (e.target === modalGeog) {
             modalGeog.style.display = 'none';
+        }
+        if (e.target === modalTrace) {
+            modalTrace.style.display = 'none';
         }
     });
 

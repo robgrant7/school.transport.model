@@ -337,8 +337,9 @@
                 </div>
             </div>
 
-            <div class="controls-actions">
+            <div class="controls-actions" style="flex-wrap: wrap;">
                 <button id="btn-reset" class="btn btn-secondary">Reset Defaults</button>
+                <button id="btn-run-trace" class="btn btn-primary" title="Generates a transparent, step-by-step audit trail showing exactly how your current input parameters calculate the final financial results. Zero hidden variables.">Run Calculation Trace</button>
             </div>
         </aside>
 
@@ -585,6 +586,20 @@
             <span class="modal-close" id="modal-geography-close-btn">&times;</span>
             <h2 class="modal-title">Geographic Realities: Volume-Based Vehicle Scaling</h2>
             <div class="modal-body" id="modal-geography-body">
+                <!-- Dynamic text populated from main.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Run Calculation Trace -->
+    <div id="modal-trace" class="modal-overlay">
+        <div class="modal-content" style="max-width: 800px;">
+            <span class="modal-close" id="modal-trace-close-btn">&times;</span>
+            <h2 class="modal-title">Calculation Audit Trace</h2>
+            <div style="margin-bottom: 20px; display: flex; justify-content: flex-end; gap: 10px; align-items: center;">
+                <button id="btn-copy-trace" class="btn btn-secondary" style="flex: none; padding: 8px 16px; font-size: 0.85rem;">Copy Trace to Clipboard</button>
+            </div>
+            <div class="modal-body" id="modal-trace-body">
                 <!-- Dynamic text populated from main.js -->
             </div>
         </div>
