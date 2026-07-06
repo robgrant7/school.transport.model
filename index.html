@@ -545,29 +545,73 @@
     <div id="modal-info" class="modal-overlay">
         <div class="modal-content">
             <span class="modal-close" id="modal-close-btn">&times;</span>
-            <h2 class="modal-title">How This Model Works &amp; Why It Is Accurate</h2>
+            <h2 class="modal-title">How This Model Works: Core Principles &amp; Calculations</h2>
             
             <div class="modal-body">
-                <h3>Overview</h3>
-                <p>This model is an independent financial audit tool designed to evaluate the true fiscal impact of changes to school transport policies. Rather than assuming instant savings and 100% compliance, it models the actual operational transitions, grandfathering clauses, and appeals funnels that occur when transport eligibility rules are changed.</p>
-                
-                <h3>How It Works</h3>
+                <h3>1. Core Architecture Principles</h3>
+                <p>This model is built to audit the true financial outcome of changing home-to-school transport eligibility rules[cite: 1, 4]. It rejects "black box" automated assumptions[cite: 1] and instead relies on four core engineering principles:</p>
                 <ul>
-                    <li><strong>Cohort-Based Transport Costs:</strong> Since policy changes typically apply only to new intakes, older cohorts continue to run under existing arrangements. The model calculates alternative vehicle costs year-by-year, summing the active student cohorts in the system, each eroding by a set rate (attrition) over their 5-year school career.</li>
-                    <li><strong>Chained Appeal Progression:</strong> Disputing transport decisions escalates through three distinct, chained stages: Stage 1 (Internal Review), Stage 2 (Independent Panel), and Stage 3 (Ombudsman). The model chains these rates (e.g., Stage 2 is a percentage of Stage 1, not of the total population) and applies the selected unit costs to each dispute.</li>
-                    <li><strong>Maturity-Phased Savings:</strong> Claimed savings do not happen instantly. The model phases in the council's savings claim over 8 years, maturing to the full claimed annual amount in Year 8 based on the council's implementation steps (starting at 19.7% in Year 1 and reaching 100% in Year 8).</li>
-                    <li><strong>Ongoing Administration:</strong> Captures the yearly software, mapping, system update, and liaison overheads required to administer a fractured transport network.</li>
+                    <li><strong>Total Separation of Concerns:</strong> The platform explicitly separates user inputs from the calculation logic and dashboard outputs[cite: 2]. This means you can manipulate any local variable dynamically via the control panel without risk of mathematical distortion[cite: 2].</li>
+                    <li><strong>100% Deterministic Transparency:</strong> Every line of math is fully linear and traceable[cite: 1]. There are no hidden multipliers or behind-the-scenes calibrations[cite: 1]. The output is strictly a direct factor of your parameters[cite: 2].</li>
+                    <li><strong>Operational Cost Realism:</strong> Rather than pretending bus routes can be instantly deleted, the model respects fixed contract realities and statutory grandfathering laws[cite: 1, 4].</li>
+                    <li><strong>Symmetrical Analysis:</strong> To maintain total objectivity, the engine accurately applies the council's phased schedule to offset their claimed savings against newly generated operational overheads[cite: 2, 4].</li>
                 </ul>
-                
-                <h3>Why It Is Accurate</h3>
+
+                <h3>2. The Step-by-Step Calculation Engine</h3>
+                <p>When you move any slider or trigger the engine, the model executes a sequential series of calculations over a rolling 8-year timeline[cite: 2, 4]:</p>
+
+                <h4>Step A: Establishing Net Volume (The Intake)</h4>
+                <p>The model determines exactly how many new children enter the system each year needing alternative transportation[cite: 2, 4]. It scales back the total baseline parameter using the opt-out rate[cite: 2]:</p>
+                <div class="formula-box">
+                    Actual Affected Pupils = Baseline Children Affected × (1 - Opt-Out Rate)[cite: 2]
+                </div>
+
+                <h4>Step B: Geographic Partitioning &amp; Vehicle Allocation</h4>
+                <p>Rural communities cannot merge transit routes due to single-track roads and vast distances[cite: 1, 4]. The model splits the annual student intake across separate micro-geographies[cite: 1, 2, 4]:</p>
+                <div class="formula-box">
+                    Pupils per Zone = Actual Affected Pupils ÷ Number of Feeder Clusters[cite: 2]
+                </div>
+                <p>From here, the engine applies multi-tier vehicle logic to every individual zone[cite: 2, 4]:</p>
                 <ul>
-                    <li><strong>Reflects Fixed Cost Realities:</strong> Large school buses cannot be cancelled immediately if even a few grandfathered students remain on the route. Cohort modeling prevents the model from claiming "day one" bus route savings.</li>
-                    <li><strong>Accurate Appellate Chaining:</strong> By modeling appeals as a funnel (Stage 2 funnels from Stage 1; Ombudsman funnels from Stage 2), the model reflects actual administrative volumes and legal escalation rates.</li>
-                    <li><strong>Audited Cost Parameters:</strong> Default unit costs and dispute rates are derived from audited local government accounts and historic appeals volumes, ensuring realistic baseline projections.</li>
+                    <li><strong>Isolated Taxis:</strong> A subset of students (defined by the Isolation Rate) live in remote spots[cite: 2, 4]. They require dedicated taxis (capacity of 3 pupils) regardless of overall numbers[cite: 2, 4].</li>
+                    <li><strong>Group Vehicle Threshold Scaling:</strong> The remaining zone population is bundled into a vehicle contract based on volume triggers[cite: 2, 4]. If the count is below the Minibus Threshold, they use group Taxis[cite: 2, 4]. If it hits the Minibus Threshold but stays below the Coach Threshold, they upgrade to a Minibus[cite: 2, 4]. If it hits the Coach Threshold, they consolidate into a full-capacity commercial Coach contract[cite: 2, 4].</li>
                 </ul>
+                <p>The system sums the daily vehicle costs for a single zone, multiplies by the number of zones, and multiplies by 190 standard school days to output the total annual transport spot cost[cite: 2].</p>
+
+                <h4>Step C: The Rolling Cohort Stack (Years 1 to 5)</h4>
+                <p>Because changes only apply to incoming new starters, older students keep their existing transport[cite: 1, 4]. The model tracks students across their 5-year school careers by compounding active cohorts inside a rolling loop[cite: 2, 4]:</p>
+                <ul>
+                    <li><strong>Year 1:</strong> Contains 1 cohort (new intake only)[cite: 1, 2].</li>
+                    <li><strong>Year 2:</strong> Contains 2 cohorts (the previous intake now in their 2nd year + a new 1st-year intake)[cite: 1, 2].</li>
+                    <li><strong>Year 5 to 8:</strong> The system reaches its maximum steady-state density with 5 overlapping cohorts active in the system simultaneously[cite: 1, 2, 4]. This is why alternative vehicle contract costs grow intensely through Year 5[cite: 1, 2].</li>
+                </ul>
+
+                <h4>Step D: Chained Appeals Progression Funnel</h4>
+                <p>Parent disputes generate direct administrative costs for the council[cite: 1, 4]. The engine processes these via a strict sequential funnel rather than an aggregated flat rate[cite: 2, 4]:</p>
+                <div class="formula-box">
+                    Stage 1 Review Cost = (Annual Intake × S1 Appeal Rate) × S1 Unit Cost[cite: 2]<br>
+                    Stage 2 Panel Cost = (Stage 1 Count × S2 Escalation Rate) × S2 Unit Cost[cite: 2]<br>
+                    Stage 3 Ombudsman Cost = (Stage 2 Count × S3 Escalation Rate) × S3 Unit Cost[cite: 2]
+                </div>
+                <p>The total appeal cost is the sum of these three independent pipelines added to the ongoing system administration overhead parameter[cite: 2].</p>
+
+                <h4>Step E: Phased Savings Offsetting</h4>
+                <p>The council's mature annual savings target is not hit on day one[cite: 2, 4]. The model scales down their maximum savings claim according to the official phased implementation milestones[cite: 2, 4]:</p>
+                <ul>
+                    <li><strong>Year 1:</strong> Savings are restricted to 19.72% of the mature target[cite: 2, 4].</li>
+                    <li><strong>Years 2–7:</strong> Progressively scaled using official budget weights (37.39%, 56.06%, 73.79%, 84.12%, 94.44%, 96.96%)[cite: 2, 4].</li>
+                    <li><strong>Year 8:</strong> Reaches 100% maturity[cite: 2, 4].</li>
+                </ul>
+
+                <h3>3. The Final Net Balance Equation</h3>
+                <p>For each year, the net fiscal balance is calculated dynamically[cite: 2]:</p>
+                <div class="formula-box">
+                    Net Balance = Phased Council Savings Claim - (Vehicle Costs + Appeal Costs + Admin Overhead)[cite: 2]
+                </div>
+                <p>The primary KPI visible on your dashboard displays the 8-Year Cumulative Balance, summing the true fiscal performance across the entire transition period to determine if the policy breaks even or loses public money[cite: 2, 4].</p>
             </div>
         </div>
-    </div>
+    </div>  
 
     <!-- Modal: Year 1 At a Glance -->
     <div id="modal-year1" class="modal-overlay">
