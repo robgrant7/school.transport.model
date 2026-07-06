@@ -552,7 +552,15 @@
                 <p>The STAG School Transport Cost Analysis Model is a <strong>deterministic, cohort-based financial forecasting and audit tool</strong>. It is specifically engineered to stress-test the long-term fiscal projections of local authority home-to-school transport policy shifts.</p>
                 <p>Rather than treating policy changes as clean, instant adjustments, this model uses an operational risk approach. It maps out the hidden friction points, statutory constraints, and compounding overheads that occur when a structured public service is fractured. The engine evaluates a policy transition over an <strong>8-year timeline</strong> (progressing from Year 1 to Year 8 maturity) using three core methodology layers: volume-based geographic partitioning, rolling cohort stacking, and chained appellate funneling.</p>
 
-                <h3>2. Core Architecture Principles</h3>
+                <h3>2. The Approach in Plain English</h3>
+                <p>In simple terms, when a council decides to cut free school transport to save money, they usually assume that every family will quietly accept the choice, and that large school buses can be cancelled on day one. In reality, school transport does not work that way. This model introduces the real-world friction and rules that the council left out of their math:</p>
+                <ul>
+                    <li><strong>The Stacking Effect:</strong> Rules only apply to incoming new starters. Older kids keep their transport rights until they finish school ("grandfathering"). This means a council cannot easily cancel a bus route if even a few older kids still need it. Costs pile up year after year as new groups of affected children enter the system, peaking at Year 5.</li>
+                    <li><strong>Rural Route Splitting:</strong> If a major bus route is cut, the leftover children scattered across deep countryside cannot just be zipped up into a single vehicle due to vast distances. The model splits children into their actual local village clusters. It puts isolated kids down single-track lanes into solo taxis and groups the rest into vans or minibuses depending on how many live nearby.</li>
+                    <li><strong>The Dispute Pipeline:</strong> Removing transport causes an immediate wave of parent challenges. Processing these requires significant staff time, independent legal panels, and Ombudsman reviews, costing the council hundreds of pounds per family to resolve.</li>
+                </ul>
+
+                <h3>3. Core Architecture Principles</h3>
                 <p>The platform rejects "black box" automated assumptions and instead relies on four core engineering principles:</p>
                 <ul>
                     <li><strong>Total Separation of Concerns:</strong> The platform explicitly separates user inputs from the calculation logic and dashboard outputs. This means you can manipulate any local variable dynamically via the control panel without risk of mathematical distortion.</li>
@@ -561,7 +569,7 @@
                     <li><strong>Symmetrical Analysis:</strong> To maintain total objectivity, the engine accurately applies the council's phased schedule to offset their claimed savings against newly generated operational overheads.</li>
                 </ul>
 
-                <h3>3. The Step-by-Step Calculation Engine</h3>
+                <h3>4. The Step-by-Step Calculation Engine</h3>
                 <p>When you move any slider or trigger the engine, the model executes a sequential series of calculations over a rolling 8-year timeline:</p>
 
                 <h4>Step A: Establishing Net Volume (The Intake)</h4>
@@ -575,12 +583,27 @@
                 <div class="formula-box">
                     Pupils per Zone = Actual Affected Pupils ÷ Number of Feeder Clusters
                 </div>
-                <p>From here, the engine applies multi-tier vehicle logic to every individual zone:</p>
+                
+                <h5>Alternative Vehicle Cost Allocation Logic</h5>
+                <p>Once the student population is divided into zones, the engine assigns vehicle contracts using a multi-tier threshold model to handle route fracturing:</p>
                 <ul>
-                    <li><strong>Isolated Taxis:</strong> A subset of students (defined by the Isolation Rate) live in remote spots. They require dedicated taxis (capacity of 3 pupils) regardless of overall numbers.</li>
-                    <li><strong>Group Vehicle Threshold Scaling:</strong> The remaining zone population is bundled into a vehicle contract based on volume triggers. If the count is below the Minibus Threshold, they use group Taxis. If it hits the Minibus Threshold but stays below the Coach Threshold, they upgrade to a Minibus. If it hits the Coach Threshold, they consolidate into a full-capacity commercial Coach contract.</li>
+                    <li><strong>1. Isolated Fleet Allocation:</strong> A baseline portion of the zone population (defined by the <em>Isolation Rate</em>) is immediately assigned to individual single-contract Taxis due to deep rural remote constraints.
+                        <div class="formula-box" style="color: #00d2ff;">Isolated Taxis per Zone = (Pupils per Zone × Isolation Rate) ÷ Taxi Capacity (3)</div>
+                    </li>
+                    <li><strong>2. Residual Cohort Calculation:</strong> The remaining students in the zone are bundled together into the most efficient group contract tier dictated by volume constraints:
+                        <div class="formula-box" style="color: #00d2ff;">Remaining Group Pupils = Pupils per Zone - Isolated Pupils</div>
+                    </li>
+                    <li><strong>3. Dynamic Vehicle Tier Selection:</strong> The engine checks the volume of group pupils against active infrastructure limits:
+                        <ul>
+                            <li style="margin-top: 6px;"><em>Tier 1 (Group Taxis):</em> If Group Pupils is <strong>less than the Minibus Threshold</strong>, they scale into standard taxis. <br><strong>Formula:</strong> Group Taxis = Group Pupils ÷ Taxi Capacity</li>
+                            <li style="margin-top: 6px;"><em>Tier 2 (Minibuses):</em> If Group Pupils is <strong>equal to or greater than the Minibus Threshold, but less than the Coach Threshold</strong>, they upgrade to a minibus contract. <br><strong>Formula:</strong> Minibuses = Group Pupils ÷ Minibus Capacity</li>
+                            <li style="margin-top: 6px;"><em>Tier 3 (Coaches):</em> If Group Pupils <strong>reaches or exceeds the Coach Threshold</strong>, they consolidate into a full commercial coach route. <br><strong>Formula:</strong> Coaches = Group Pupils ÷ Coach Capacity</li>
+                        </ul>
+                    </li>
+                    <li style="margin-top: 10px;"><strong>4. Total Cost Aggregation:</strong> Vehicle volumes per zone are compiled, multiplied across all clusters, and multiplied by standard operating days:
+                        <div class="formula-box" style="color: #00d2ff;">Annual Transport Cost = [(Total Taxis × Taxi Cost) + (Total Minibuses × Minibus Cost) + (Total Coaches × Coach Cost)] × Number of Zones × 190 Days</div>
+                    </li>
                 </ul>
-                <p>The system sums the daily vehicle costs for a single zone, multiplies by the number of zones, and multiplies by 190 standard school days to output the total annual transport spot cost.</p>
 
                 <h4>Step C: The Rolling Cohort Stack (Years 1 to 5)</h4>
                 <p>Because changes only apply to incoming new starters, older students keep their existing transport. The model tracks students across their 5-year school careers by compounding active cohorts inside a rolling loop:</p>
@@ -607,7 +630,7 @@
                     <li><strong>Year 8:</strong> Reaches 100% maturity.</li>
                 </ul>
 
-                <h3>4. The Final Net Balance Equation</h3>
+                <h3>5. The Final Net Balance Equation</h3>
                 <p>For each year, the net fiscal balance is calculated dynamically:</p>
                 <div class="formula-box">
                     Net Balance = Phased Council Savings Claim - (Vehicle Costs + Appeal Costs + Admin Overhead)
